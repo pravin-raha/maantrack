@@ -1,16 +1,13 @@
 package com.maantrack
 
-import cats.effect.{Async, ConcurrentEffect, ContextShift, Timer}
+import cats.effect.{Async, ConcurrentEffect}
 import com.maantrack.endpoint.HelloServiceEndpoint
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.HttpRoutes
-import org.http4s.client.Client
 
-class Module[F[_]: Async](client: Client[F])(
-    implicit F: ConcurrentEffect[F],
-    CS: ContextShift[F],
-    T: Timer[F]
+class Module[F[_]: Async]()(
+    implicit F: ConcurrentEffect[F]
 ) {
 
   implicit def unsafeLogger: SelfAwareStructuredLogger[F] =
@@ -20,4 +17,3 @@ class Module[F[_]: Async](client: Client[F])(
   val httpEndpoint: HttpRoutes[F] = helloWorldService
 
 }
-

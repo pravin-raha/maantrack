@@ -8,13 +8,11 @@ import fs2.Stream
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.HttpApp
-import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.Router
 import org.http4s.server.blaze._
 import org.http4s.syntax.all._
 import pureconfig.loadConfigOrThrow
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.higherKinds
 
 object Main extends IOApp {
@@ -33,8 +31,7 @@ object HttpServer {
       serverConfig <- Stream.eval(
         Monad[F].pure(loadConfigOrThrow[ServerConfig]("server"))
       )
-      client <- BlazeClientBuilder[F](global).stream
-      ctx <- Stream(new Module[F](client))
+      ctx <- Stream(new Module[F]())
       exitCode <- BlazeServerBuilder[F]
         .bindHttp(serverConfig.port, serverConfig.host)
         .withHttpApp(httpApp(ctx))

@@ -9,7 +9,6 @@ import org.http4s.{EntityDecoder, HttpRoutes, Response}
 import tsec.authentication.{
   BackingStore,
   BearerTokenAuthenticator,
-  SecuredRequest,
   SecuredRequestHandler,
   TSecAuthService,
   TSecBearerToken,
@@ -48,24 +47,23 @@ class HelloServiceEndpoint[F[_]: Async](implicit F: ConcurrentEffect[F])
       settings
     )
 
-  val Auth =
-    SecuredRequestHandler(bearerTokenAuth)
+  val Auth: SecuredRequestHandler[F, Int, User, TSecBearerToken[Int]] =
+    SecuredRequestHandler[F, Int, User, TSecBearerToken[Int]](bearerTokenAuth)
 
   val authService1: AuthService = TSecAuthService {
     //Where user is the case class User above
-    case request @ GET -> Root / "api" asAuthed user =>
+    case _ @GET -> Root / "api" asAuthed _ =>
       /*
       Note: The request is of type: SecuredRequest, which carries:
       1. The request
       2. The Authenticator (i.e token)
       3. The identity (i.e in this case, User)
        */
-      val r: SecuredRequest[F, User, TSecBearerToken[Int]] = request
       Ok()
   }
 
   val authedService2: AuthService = TSecAuthService {
-    case GET -> Root / "api2" asAuthed user =>
+    case GET -> Root / "api2" asAuthed _ =>
       Ok()
   }
 
@@ -82,7 +80,7 @@ class HelloServiceEndpoint[F[_]: Async](implicit F: ConcurrentEffect[F])
     case req @ POST -> Root / "user" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
-        foundUser <- userStore.put(
+        _ <- userStore.put(
           User(userRequest.id, userRequest.age, userRequest.name)
         )
         result <- Ok()
@@ -90,16 +88,13 @@ class HelloServiceEndpoint[F[_]: Async](implicit F: ConcurrentEffect[F])
 
       res.recoverWith { case _ => BadRequest() }
 
-    case req @ POST -> Root / "login" => {
+    case req @ POST -> Root / "login" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
         resp <- Ok()
         tok <- bearerTokenAuth.create(userRequest.id)
       } yield bearerTokenAuth.embed(resp, tok)
-
-      res
-//        .recoverWith { case _ => BadRequest() }
-    }
+      res.recoverWith { case _ => BadRequest() }
   }
 
   def service: HttpRoutes[F] = helloservice <+> liftedComposed

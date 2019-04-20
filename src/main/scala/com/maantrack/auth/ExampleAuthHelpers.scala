@@ -3,6 +3,7 @@ package com.maantrack.auth
 import cats._
 import cats.data.OptionT
 import cats.effect.{IO, Sync}
+import cats.implicits._
 import com.maantrack.auth.ExampleAuthHelpers.Role.{Administrator, Customer}
 import tsec.authentication._
 import tsec.authorization._
@@ -22,7 +23,9 @@ object ExampleAuthHelpers {
     )
 
   /** dummy factory for backing storage */
-  def dummyBackingStore[F[_], I, V](getId: V => I)(implicit F: Sync[F]): BackingStore[F, I, V] =
+  def dummyBackingStore[F[_], I, V](
+      getId: V => I
+  )(implicit F: Sync[F]): BackingStore[F, I, V] =
     new BackingStore[F, I, V] {
       private val storageMap = mutable.HashMap.empty[I, V]
 
@@ -65,10 +68,10 @@ object ExampleAuthHelpers {
     lazy val Seller: Role = Role("Seller")
 
     implicit val E: Eq[Role] = Eq.fromUniversalEquals[Role]
-    override val getRepr: Role => String = r => r.roleRepr
-    override val orElse: Role = Customer
     protected val values: AuthGroup[Role] =
       AuthGroup(Administrator, Customer, Seller)
+
+    override def getRepr(t: Role): String = t.roleRepr
   }
 
   object User {
