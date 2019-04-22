@@ -1,13 +1,18 @@
 package com.maantrack.endpoint
 
-import cats.effect.{Async, ConcurrentEffect}
+import cats.effect._
 import cats.implicits._
-import io.circe.generic.auto._
-import org.http4s.circe._
+import com.maantrack.auth.{TokenBackingStore, UserBackingStore}
+import com.maantrack.domain.Error
+import com.maantrack.domain.user.{
+  User,
+  UserCredential,
+  UserRequest,
+  UserService
+}
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{EntityDecoder, HttpRoutes, Response}
+import org.http4s.{HttpRoutes, Response}
 import tsec.authentication.{
-  BackingStore,
   BearerTokenAuthenticator,
   SecuredRequestHandler,
   TSecAuthService,
@@ -15,25 +20,22 @@ import tsec.authentication.{
   TSecTokenSettings,
   _
 }
-import tsec.common.SecureRandomId
+import tsec.common.Verified
+import tsec.passwordhashers.jca.JCAPasswordPlatform
+import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 
 import scala.concurrent.duration._
 import scala.language.higherKinds
 
-class HelloServiceEndpoint[F[_]: Async](implicit F: ConcurrentEffect[F])
+class HelloServiceEndpoint[F[_]: Sync, A](
+    userBackingStore: UserBackingStore[F],
+    tokenBackingStore: TokenBackingStore[F],
+    userService: UserService[F],
+    hasher: JCAPasswordPlatform[A]
+)(implicit F: ConcurrentEffect[F], P: PasswordHasher[F, A])
     extends Http4sDsl[F] {
 
-  import com.maantrack.auth.ExampleAuthHelpers._
-
   type AuthService = TSecAuthService[User, TSecBearerToken[Int], F]
-
-  val bearerTokenStore: BackingStore[F, SecureRandomId, TSecBearerToken[Int]] =
-    dummyBackingStore[F, SecureRandomId, TSecBearerToken[Int]](
-      s => SecureRandomId.coerce(s.id)
-    )
-  //We create a way to store our users. You can attach this to say, your doobie accessor
-  val userStore: BackingStore[F, Int, User] =
-    dummyBackingStore[F, Int, User](_.id)
 
   val settings: TSecTokenSettings = TSecTokenSettings(
     expiryDuration = 10.minutes, //Absolute expiration time
@@ -42,8 +44,8 @@ class HelloServiceEndpoint[F[_]: Async](implicit F: ConcurrentEffect[F])
 
   val bearerTokenAuth =
     BearerTokenAuthenticator(
-      bearerTokenStore,
-      userStore,
+      tokenBackingStore,
+      userBackingStore,
       settings
     )
 
@@ -71,18 +73,14 @@ class HelloServiceEndpoint[F[_]: Async](implicit F: ConcurrentEffect[F])
   val liftedComposed: HttpRoutes[F] =
     Auth.liftService(authService1 <+> authedService2)
 
-  implicit val elementRequestDecoder: EntityDecoder[F, UserRequest] =
-    jsonOf[F, UserRequest]
-  val helloservice: HttpRoutes[F] = HttpRoutes.of[F] {
+  val helloService: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "hello" / name =>
       Ok(s"Hello, $name.")
 
     case req @ POST -> Root / "user" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
-        _ <- userStore.put(
-          User(userRequest.id, userRequest.age, userRequest.name)
-        )
+        _ <- userService.addUser(userRequest)
         result <- Ok()
       } yield result
 
@@ -90,20 +88,40 @@ class HelloServiceEndpoint[F[_]: Async](implicit F: ConcurrentEffect[F])
 
     case req @ POST -> Root / "login" =>
       val res: F[Response[F]] = for {
-        userRequest <- req.as[UserRequest]
-        resp <- Ok()
-        tok <- bearerTokenAuth.create(userRequest.id)
+        userCredential <- req.as[UserCredential]
+        user <- userService
+          .getUserByUserName(userCredential.userName)
+          .toRight(Error.NotFound(): Throwable)
+          .value
+          .flatMap(_.raiseOrPure[F])
+        hash = PasswordHash[A](user.password)
+        status <- hasher.checkpw[F](userCredential.password.getBytes, hash)
+        resp <- if (status == Verified) Ok()
+        else Sync[F].raiseError[Response[F]](Error.BadLogin())
+        tok <- bearerTokenAuth.create(user.id)
       } yield bearerTokenAuth.embed(resp, tok)
+
       res.recoverWith { case _ => BadRequest() }
   }
 
-  def service: HttpRoutes[F] = helloservice <+> liftedComposed
+  def service: HttpRoutes[F] = helloService <+> liftedComposed
 
 }
 
 object HelloServiceEndpoint {
-  def apply[F[_]: Async](
-      implicit F: ConcurrentEffect[F]
-  ): HelloServiceEndpoint[F] =
-    new HelloServiceEndpoint()
+  def apply[F[_]: Async, A](
+      userBackingStore: UserBackingStore[F],
+      tokenBackingStore: TokenBackingStore[F],
+      userService: UserService[F],
+      hasher: JCAPasswordPlatform[A]
+  )(
+      implicit F: ConcurrentEffect[F],
+      P: PasswordHasher[F, A]
+  ): HelloServiceEndpoint[F, A] =
+    new HelloServiceEndpoint(
+      userBackingStore,
+      tokenBackingStore,
+      userService,
+      hasher
+    )
 }

@@ -13,7 +13,7 @@ class Module[F[_]: Async]()(
   implicit def unsafeLogger: SelfAwareStructuredLogger[F] =
     Slf4jLogger.unsafeCreate[F]
 
-  val helloWorldService: HttpRoutes[F] = HelloServiceEndpoint[F].service
-  val httpEndpoint: HttpRoutes[F] = helloWorldService
+//  val helloWorldService: HttpRoutes[F] = HelloServiceEndpoint[F].service
+  val httpEndpoint: HttpRoutes[F] = ???
 
 }
