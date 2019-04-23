@@ -15,12 +15,13 @@ import tsec.mac.jca.HMACSHA256
 sealed case class Role(roleRepr: String)
 
 case class User(
-    id: Int,
+    id: Long,
     age: Int,
     name: String,
     userName: String,
     role: Role = Role.Customer,
-    password: String
+    password: String,
+    email: String
 )
 
 case class UserRequest(
@@ -28,14 +29,17 @@ case class UserRequest(
     name: String,
     userName: String,
     role: Role = Role.Customer,
-    password: String
+    password: String,
+    email: String
 )
 
 case class UserResponse(
-    id: Int,
+    id: Long,
     age: Int,
     name: String,
-    role: Role
+    role: Role,
+    email: String,
+    userName: String
 )
 
 case class UserCredential(userName: String, password: String)
@@ -46,11 +50,11 @@ object Role extends SimpleAuthEnum[Role, String] {
   lazy val Seller: Role = Role("Seller")
 
   implicit val E: Eq[Role] = Eq.fromUniversalEquals[Role]
-  val AdminRequired: BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Int]] =
-    BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Int]](Administrator)
+  val AdminRequired: BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Long]] =
+    BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Long]](Administrator)
   val CustomerRequired
-      : BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Int]] =
-    BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Int]](
+      : BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Long]] =
+    BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Long]](
       Administrator,
       Customer
     )

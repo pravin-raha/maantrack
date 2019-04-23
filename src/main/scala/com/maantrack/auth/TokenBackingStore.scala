@@ -6,23 +6,23 @@ import tsec.authentication.{BackingStore, TSecBearerToken}
 import tsec.common.SecureRandomId
 
 trait TokenBackingStore[F[_]]
-    extends BackingStore[F, SecureRandomId, TSecBearerToken[Int]]
+    extends BackingStore[F, SecureRandomId, TSecBearerToken[Long]]
 
 object TokenBackingStore {
   def apply[F[_]](tokenService: TokenService[F]): TokenBackingStore[F] =
     new TokenBackingStore[F]() {
       override def put(
-          bearerToken: TSecBearerToken[Int]
-      ): F[TSecBearerToken[Int]] = tokenService.addToken(bearerToken)
+          bearerToken: TSecBearerToken[Long]
+      ): F[TSecBearerToken[Long]] = tokenService.addToken(bearerToken)
 
       override def update(
-          bearerToken: TSecBearerToken[Int]
-      ): F[TSecBearerToken[Int]] = tokenService.updateToken(bearerToken)
+          bearerToken: TSecBearerToken[Long]
+      ): F[TSecBearerToken[Long]] = tokenService.updateToken(bearerToken)
 
       override def delete(id: SecureRandomId): F[Unit] =
         tokenService.deleteTokenById(id)
 
-      override def get(id: SecureRandomId): OptionT[F, TSecBearerToken[Int]] =
+      override def get(id: SecureRandomId): OptionT[F, TSecBearerToken[Long]] =
         tokenService.getTokenById(id)
     }
 }

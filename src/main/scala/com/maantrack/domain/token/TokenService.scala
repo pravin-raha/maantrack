@@ -1,10 +1,11 @@
 package com.maantrack.domain.token
 
 import cats.data.OptionT
+import cats.effect.Async
 import com.maantrack.auth.BearerToken
 import tsec.common.SecureRandomId
 
-class TokenService[F[_]](tokenRepository: TokenRepository[F]) {
+class TokenService[F[_]: Async](tokenRepository: TokenRepository[F]) {
 
   def addToken(bearerToken: BearerToken): F[BearerToken] =
     tokenRepository.addToken(bearerToken)
@@ -17,4 +18,9 @@ class TokenService[F[_]](tokenRepository: TokenRepository[F]) {
 
   def getTokenById(secureRandomId: SecureRandomId): OptionT[F, BearerToken] =
     tokenRepository.getTokenById(secureRandomId)
+}
+
+object TokenService {
+  def apply[F[_]: Async](tokenRepository: TokenRepository[F]): TokenService[F] =
+    new TokenService(tokenRepository)
 }

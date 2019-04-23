@@ -6,4 +6,6 @@ object Error {
   case class NotFound(override val msg: String = "Not found") extends Error(msg)
   case class Duplicate(override val msg: String = "Duplicate object")
       extends Error(msg)
+  case class InsertFail(override val msg: String = "Insert  fail")
+      extends Error(msg)
 }

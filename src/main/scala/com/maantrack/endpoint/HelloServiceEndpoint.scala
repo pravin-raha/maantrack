@@ -2,7 +2,6 @@ package com.maantrack.endpoint
 
 import cats.effect._
 import cats.implicits._
-import com.maantrack.auth.{TokenBackingStore, UserBackingStore}
 import com.maantrack.domain.Error
 import com.maantrack.domain.user.{
   User,
@@ -12,45 +11,20 @@ import com.maantrack.domain.user.{
 }
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, Response}
-import tsec.authentication.{
-  BearerTokenAuthenticator,
-  SecuredRequestHandler,
-  TSecAuthService,
-  TSecBearerToken,
-  TSecTokenSettings,
-  _
-}
+import tsec.authentication.{TSecAuthService, TSecBearerToken, _}
 import tsec.common.Verified
-import tsec.passwordhashers.jca.JCAPasswordPlatform
 import tsec.passwordhashers.{PasswordHash, PasswordHasher}
 
-import scala.concurrent.duration._
 import scala.language.higherKinds
 
 class HelloServiceEndpoint[F[_]: Sync, A](
-    userBackingStore: UserBackingStore[F],
-    tokenBackingStore: TokenBackingStore[F],
+    bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
     userService: UserService[F],
-    hasher: JCAPasswordPlatform[A]
-)(implicit F: ConcurrentEffect[F], P: PasswordHasher[F, A])
+    hasher: PasswordHasher[F, A]
+)(implicit F: ConcurrentEffect[F])
     extends Http4sDsl[F] {
 
-  type AuthService = TSecAuthService[User, TSecBearerToken[Int], F]
-
-  val settings: TSecTokenSettings = TSecTokenSettings(
-    expiryDuration = 10.minutes, //Absolute expiration time
-    maxIdle = None
-  )
-
-  val bearerTokenAuth =
-    BearerTokenAuthenticator(
-      tokenBackingStore,
-      userBackingStore,
-      settings
-    )
-
-  val Auth: SecuredRequestHandler[F, Int, User, TSecBearerToken[Int]] =
-    SecuredRequestHandler[F, Int, User, TSecBearerToken[Int]](bearerTokenAuth)
+  type AuthService = TSecAuthService[User, TSecBearerToken[Long], F]
 
   val authService1: AuthService = TSecAuthService {
     //Where user is the case class User above
@@ -69,9 +43,7 @@ class HelloServiceEndpoint[F[_]: Sync, A](
       Ok()
   }
 
-  val lifted: HttpRoutes[F] = Auth.liftService(authService1)
-  val liftedComposed: HttpRoutes[F] =
-    Auth.liftService(authService1 <+> authedService2)
+  val liftedComposed: AuthService = authService1 <+> authedService2
 
   val helloService: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "hello" / name =>
@@ -95,7 +67,7 @@ class HelloServiceEndpoint[F[_]: Sync, A](
           .value
           .flatMap(_.raiseOrPure[F])
         hash = PasswordHash[A](user.password)
-        status <- hasher.checkpw[F](userCredential.password.getBytes, hash)
+        status <- hasher.checkpw(userCredential.password.getBytes, hash)
         resp <- if (status == Verified) Ok()
         else Sync[F].raiseError[Response[F]](Error.BadLogin())
         tok <- bearerTokenAuth.create(user.id)
@@ -104,23 +76,21 @@ class HelloServiceEndpoint[F[_]: Sync, A](
       res.recoverWith { case _ => BadRequest() }
   }
 
-  def service: HttpRoutes[F] = helloService <+> liftedComposed
+  def publicService: HttpRoutes[F] = helloService
+  def privateService: AuthService = liftedComposed
 
 }
 
 object HelloServiceEndpoint {
   def apply[F[_]: Async, A](
-      userBackingStore: UserBackingStore[F],
-      tokenBackingStore: TokenBackingStore[F],
+      bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
       userService: UserService[F],
-      hasher: JCAPasswordPlatform[A]
+      hasher: PasswordHasher[F, A]
   )(
-      implicit F: ConcurrentEffect[F],
-      P: PasswordHasher[F, A]
+      implicit F: ConcurrentEffect[F]
   ): HelloServiceEndpoint[F, A] =
     new HelloServiceEndpoint(
-      userBackingStore,
-      tokenBackingStore,
+      bearerTokenAuth,
       userService,
       hasher
     )
