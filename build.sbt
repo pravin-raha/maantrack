@@ -63,8 +63,8 @@ lazy val tsec = Seq(
   "io.github.jmcardon" %% "tsec-http4s" % tsecV
 )
 
-scalacOptions ++= Seq(
-  // format: off
+// format: off
+  scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
   "-encoding", "utf-8",                // Specify character encoding used by source files.
   "-explaintypes",                     // Explain type errors in more detail.
@@ -110,5 +110,5 @@ scalacOptions ++= Seq(
   "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",            // Warn if a private member is unused.
   "-Ywarn-value-discard"               // Warn when non-Unit expression results are unused.
-  // format: on
 )
+// format: on

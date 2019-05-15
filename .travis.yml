@@ -1,0 +1,24 @@
+language: scala
+dist: xenial
+
+scala:
+  - 2.12.8
+
+jdk:
+  - openjdk8
+
+jobs:
+  include:
+    - env: TEST="scalafmt"
+      script: ./bin/scalafmt --test
+    - env: TEST="compilation"
+      script: sbt ++$TRAVIS_SCALA_VERSION compile test
+
+cache:
+  directories:
+    - "$HOME/.coursier/cache"
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt/boot"
+
+before_cache:
+  - cleanup_cache
