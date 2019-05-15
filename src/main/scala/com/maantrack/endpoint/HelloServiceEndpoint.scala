@@ -9,6 +9,7 @@ import com.maantrack.domain.user.{
   UserRequest,
   UserService
 }
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, Response}
 import tsec.authentication.{TSecAuthService, TSecBearerToken, _}
@@ -46,17 +47,23 @@ class HelloServiceEndpoint[F[_]: Sync, A](
   val liftedComposed: AuthService = authService1 <+> authedService2
 
   val helloService: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "hello" / name =>
-      Ok(s"Hello, $name.")
 
     case req @ POST -> Root / "user" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
-        _ <- userService.addUser(userRequest)
+        hash <- hasher.hashpw(userRequest.password.getBytes)
+        _ <- userService.addUser(userRequest.copy(password = hash))
         result <- Ok()
       } yield result
 
-      res.recoverWith { case _ => BadRequest() }
+      res.recoverWith {
+        case e =>
+          for {
+            logger <- Slf4jLogger.create[F]
+            _ <- logger.error(e)(e.getMessage)
+            b <- BadRequest()
+          } yield b
+      }
 
     case req @ POST -> Root / "login" =>
       val res: F[Response[F]] = for {
@@ -73,7 +80,14 @@ class HelloServiceEndpoint[F[_]: Sync, A](
         tok <- bearerTokenAuth.create(user.id)
       } yield bearerTokenAuth.embed(resp, tok)
 
-      res.recoverWith { case _ => BadRequest() }
+      res.recoverWith {
+        case e =>
+          for {
+            logger <- Slf4jLogger.create[F]
+            _ <- logger.error(e)(e.getMessage)
+            b <- BadRequest()
+          } yield b
+      }
   }
 
   def publicService: HttpRoutes[F] = helloService

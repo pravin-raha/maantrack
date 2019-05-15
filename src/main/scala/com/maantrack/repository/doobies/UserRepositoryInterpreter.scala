@@ -21,7 +21,7 @@ private object UserSql {
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def select(id: Long): doobie.Query0[User] = sql"""
-      SELECT *
+      SELECT id, age, name, username, role, password, email
       FROM user
       WHERE user_id = $id
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
@@ -35,7 +35,7 @@ private object UserSql {
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def selectByUserName(username: String): doobie.Query0[User] = sql"""
-      SELECT *
+      SELECT id, age, name, username, role, password, email
       FROM user
       WHERE username = $username
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
