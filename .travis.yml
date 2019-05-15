@@ -1,7 +1,13 @@
 language: scala
 scala:
   - 2.12.8
+
 jdk:
   - openjdk8
 
-script: sbt ++$TRAVIS_SCALA_VERSION compile test
+jobs:
+  include:
+    - env: TEST="scalafmt"
+      script: ./bin/scalafmt --test
+    - env: TEST="compilation"
+      script: sbt ++$TRAVIS_SCALA_VERSION compile test
