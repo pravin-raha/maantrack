@@ -15,7 +15,7 @@ import tsec.common.SecureRandomId
 object BearerSQL {
   def byUserId(userId: Long): doobie.Query0[BearerToken] =
     (select.toFragment ++ sql"""
-    where user_id = $userId
+    where users_id = $userId
   """).queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def byId(secureId: SecureRandomId): Query0[BearerToken] =
@@ -24,17 +24,17 @@ object BearerSQL {
   """).queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def select: Query0[BearerToken] = sql"""
-    select secure_id, user_id, expiry, last_touched
+    select secure_id, users_id, expiry, last_touched
     from token
   """.queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def byUsername(userId: String): Query0[BearerToken] =
     (select.toFragment ++ sql"""
-    where user_id = $userId
+    where users_id = $userId
   """).queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def insert(u: BearerToken): Update0 = sql"""
-    insert into token (secure_id, user_id, expiry, last_touched)
+    insert into token (secure_id, users_id, expiry, last_touched)
     values (${u.id}, ${u.identity}, ${u.expiry}, ${u.lastTouched})
   """.update
 

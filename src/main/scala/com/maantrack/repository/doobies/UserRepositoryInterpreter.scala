@@ -15,28 +15,28 @@ import scala.language.higherKinds
 
 private object UserSql {
   def insert(userRequest: UserRequest): Update0 =
-    sql"""INSERT INTO user (name, email, password, age, username, role) 
+    sql"""INSERT INTO users (name, email, password, age, username, role)
           VALUES (${userRequest.name}, ${userRequest.email}, ${userRequest.password},
           ${userRequest.age},${userRequest.userName},${userRequest.role.roleRepr})"""
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def select(id: Long): doobie.Query0[User] = sql"""
-      SELECT id, age, name, username, role, password, email
-      FROM user
-      WHERE user_id = $id
+      SELECT users_id, age, name, username, role, password, email
+      FROM users
+      WHERE users_id = $id
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
 
   def delete(id: Long): doobie.Update0 =
-    sql"DELETE FROM user WHERE user_id = $id"
+    sql"DELETE FROM users WHERE users_id = $id"
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def update(user: User): doobie.Update0 =
-    sql"UPDATE user set user_id = ${user.id}, name = ${user.name}, email = ${user.email} WHERE user_id = ${user.id}"
+    sql"UPDATE users set users_id = ${user.id}, name = ${user.name}, email = ${user.email} WHERE user_id = ${user.id}"
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def selectByUserName(username: String): doobie.Query0[User] = sql"""
-      SELECT id, age, name, username, role, password, email
-      FROM user
+      SELECT users_id, age, name, username, role, password, email
+      FROM users
       WHERE username = $username
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
 }
@@ -48,7 +48,7 @@ class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F])
 
   override def addUser(userRequest: UserRequest): F[User] =
     insert(userRequest)
-      .withUniqueGeneratedKeys[Long]("id")
+      .withUniqueGeneratedKeys[Long]("users_id")
       .map(id => userRequest.into[User].withFieldConst(_.id, id).transform)
       .transact(xa)
 
