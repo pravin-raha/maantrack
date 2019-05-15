@@ -1,6 +1,5 @@
 language: scala
 dist: xenial
-sudo: required
 
 scala:
   - 2.12.8
@@ -11,7 +10,7 @@ jdk:
 jobs:
   include:
     - env: TEST="scalafmt"
-      script: ./scalafmt --test
+      script: ./bin/scalafmt --test
     - env: TEST="compilation"
       script: sbt ++$TRAVIS_SCALA_VERSION compile test
 
