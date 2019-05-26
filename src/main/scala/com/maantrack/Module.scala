@@ -50,22 +50,23 @@ class Module[F[_]: Async, A](
     tokenService
   )
 
-  val settings: TSecTokenSettings = TSecTokenSettings(
+  private val settings: TSecTokenSettings = TSecTokenSettings(
     expiryDuration = 10.minutes, //Absolute expiration time
     maxIdle = None
   )
 
-  val bearerTokenAuth: BearerTokenAuthenticator[F, Long, User] =
+  private val bearerTokenAuth: BearerTokenAuthenticator[F, Long, User] =
     BearerTokenAuthenticator(
       tokenBackingStore,
       userBackingStore,
       settings
     )
 
-  val Auth: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]] =
+  private val Auth
+      : SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]] =
     SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]](bearerTokenAuth)
 
-  val helloEndpoint: HelloServiceEndpoint[F, A] =
+  private val helloEndpoint: HelloServiceEndpoint[F, A] =
     HelloServiceEndpoint(
       bearerTokenAuth,
       userService,
