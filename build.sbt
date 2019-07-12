@@ -10,11 +10,13 @@ lazy val flywayDb = "5.2.4"
 lazy val tsecV = "0.1.0"
 lazy val circeV = "0.11.1"
 lazy val CirceConfigVersion = "0.6.1"
+lazy val refinedV = "0.9.8"
 
 libraryDependencies ++= http4s
 libraryDependencies ++= tsec
 libraryDependencies ++= doobie
 libraryDependencies ++= common
+libraryDependencies ++= refined
 
 lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-core" % doobieVersion,
@@ -61,6 +63,11 @@ lazy val tsec = Seq(
   "io.github.jmcardon" %% "tsec-jwt-mac" % tsecV,
   "io.github.jmcardon" %% "tsec-jwt-sig" % tsecV,
   "io.github.jmcardon" %% "tsec-http4s" % tsecV
+)
+
+lazy val refined = Seq(
+  "eu.timepit" %% "refined" % refinedV,
+  "eu.timepit" %% "refined-cats" % refinedV
 )
 
 // format: off
