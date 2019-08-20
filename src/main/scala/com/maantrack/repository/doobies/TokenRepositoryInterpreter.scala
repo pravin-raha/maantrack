@@ -9,7 +9,7 @@ import com.maantrack.domain.token.TokenRepository
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.log.LogHandler
-import doobie.{Query0, Update0}
+import doobie.{ Query0, Update0 }
 import tsec.common.SecureRandomId
 
 object BearerSQL {
@@ -50,8 +50,7 @@ object BearerSQL {
   """.update
 }
 
-class TokenRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F])
-    extends TokenRepository[F] {
+class TokenRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends TokenRepository[F] {
 
   import BearerSQL._
 
@@ -67,14 +66,14 @@ class TokenRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F])
     delete(secureRandomId).run.transact(xa).map(_ => ())
 
   override def getTokenById(
-      secureRandomId: SecureRandomId
+    secureRandomId: SecureRandomId
   ): OptionT[F, BearerToken] = OptionT(byId(secureRandomId).option.transact(xa))
 
 }
 
 object TokenRepositoryInterpreter {
   def apply[F[_]: Monad: Async](
-      xa: HikariTransactor[F]
+    xa: HikariTransactor[F]
   ): TokenRepositoryInterpreter[F] =
     new TokenRepositoryInterpreter[F](xa)
 }

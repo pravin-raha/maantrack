@@ -1,7 +1,7 @@
 package com.maantrack
 
 import cats.effect.Sync
-import com.maantrack.domain.user.{UserCredential, UserRequest}
+import com.maantrack.domain.user.{ UserCredential, UserRequest }
 import io.circe.generic.auto._
 import org.http4s.EntityDecoder
 import org.http4s.circe.jsonOf

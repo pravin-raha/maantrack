@@ -3,25 +3,20 @@ package com.maantrack.endpoint
 import cats.effect._
 import cats.implicits._
 import com.maantrack.domain.Error
-import com.maantrack.domain.user.{
-  User,
-  UserCredential,
-  UserRequest,
-  UserService
-}
+import com.maantrack.domain.user.{ User, UserCredential, UserRequest, UserService }
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{HttpRoutes, Response}
-import tsec.authentication.{TSecAuthService, TSecBearerToken, _}
+import org.http4s.{ HttpRoutes, Response }
+import tsec.authentication.{ TSecAuthService, TSecBearerToken, _ }
 import tsec.common.Verified
-import tsec.passwordhashers.{PasswordHash, PasswordHasher}
+import tsec.passwordhashers.{ PasswordHash, PasswordHasher }
 
 import scala.language.higherKinds
 
 class HelloServiceEndpoint[F[_]: Sync, A](
-    bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
-    userService: UserService[F],
-    hasher: PasswordHasher[F, A]
+  bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
+  userService: UserService[F],
+  hasher: PasswordHasher[F, A]
 )(implicit F: ConcurrentEffect[F])
     extends Http4sDsl[F] {
 
@@ -51,17 +46,17 @@ class HelloServiceEndpoint[F[_]: Sync, A](
     case req @ POST -> Root / "user" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
-        hash <- hasher.hashpw(userRequest.password.getBytes)
-        _ <- userService.addUser(userRequest.copy(password = hash))
-        result <- Ok()
+        hash        <- hasher.hashpw(userRequest.password.getBytes)
+        _           <- userService.addUser(userRequest.copy(password = hash))
+        result      <- Ok()
       } yield result
 
       res.recoverWith {
         case e =>
           for {
             logger <- Slf4jLogger.create[F]
-            _ <- logger.error(e)(e.getMessage)
-            b <- BadRequest()
+            _      <- logger.error(e)(e.getMessage)
+            b      <- BadRequest()
           } yield b
       }
 
@@ -69,14 +64,14 @@ class HelloServiceEndpoint[F[_]: Sync, A](
       val res: F[Response[F]] = for {
         userCredential <- req.as[UserCredential]
         user <- userService
-          .getUserByUserName(userCredential.userName)
-          .toRight(Error.NotFound(): Throwable)
-          .value
-          .flatMap(_.raiseOrPure[F])
-        hash = PasswordHash[A](user.password)
+                 .getUserByUserName(userCredential.userName)
+                 .toRight(Error.NotFound(): Throwable)
+                 .value
+                 .flatMap(_.raiseOrPure[F])
+        hash   = PasswordHash[A](user.password)
         status <- hasher.checkpw(userCredential.password.getBytes, hash)
         resp <- if (status == Verified) Ok()
-        else Sync[F].raiseError[Response[F]](Error.BadLogin())
+               else Sync[F].raiseError[Response[F]](Error.BadLogin())
         tok <- bearerTokenAuth.create(user.id)
       } yield bearerTokenAuth.embed(resp, tok)
 
@@ -84,24 +79,24 @@ class HelloServiceEndpoint[F[_]: Sync, A](
         case e =>
           for {
             logger <- Slf4jLogger.create[F]
-            _ <- logger.error(e)(e.getMessage)
-            b <- BadRequest()
+            _      <- logger.error(e)(e.getMessage)
+            b      <- BadRequest()
           } yield b
       }
   }
 
   def publicService: HttpRoutes[F] = helloService
-  def privateService: AuthService = liftedComposed
+  def privateService: AuthService  = liftedComposed
 
 }
 
 object HelloServiceEndpoint {
   def apply[F[_]: Async, A](
-      bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
-      userService: UserService[F],
-      hasher: PasswordHasher[F, A]
+    bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
+    userService: UserService[F],
+    hasher: PasswordHasher[F, A]
   )(
-      implicit F: ConcurrentEffect[F]
+    implicit F: ConcurrentEffect[F]
   ): HelloServiceEndpoint[F, A] =
     new HelloServiceEndpoint(
       bearerTokenAuth,

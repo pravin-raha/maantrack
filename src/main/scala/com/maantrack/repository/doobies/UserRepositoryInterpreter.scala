@@ -4,7 +4,7 @@ import cats._
 import cats.data.OptionT
 import cats.effect.Async
 import cats.implicits._
-import com.maantrack.domain.user.{User, UserRepository, UserRequest}
+import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.log.LogHandler
@@ -41,8 +41,7 @@ private object UserSql {
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
 }
 
-class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F])
-    extends UserRepository[F] {
+class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends UserRepository[F] {
 
   import UserSql._
 
@@ -68,7 +67,7 @@ class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F])
 
 object UserRepositoryInterpreter {
   def apply[F[_]: Monad: Async](
-      xa: HikariTransactor[F]
+    xa: HikariTransactor[F]
   ): UserRepositoryInterpreter[F] =
     new UserRepositoryInterpreter[F](xa)
 }
