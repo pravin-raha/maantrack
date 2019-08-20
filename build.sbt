@@ -22,6 +22,8 @@ libraryDependencies ++= doobie
 libraryDependencies ++= common
 libraryDependencies ++= refined
 
+enablePlugins(JavaAppPackaging)
+
 lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-core"     % doobieVersion,
   "org.tpolecat" %% "doobie-specs2"   % doobieVersion,
@@ -71,3 +73,5 @@ lazy val tsec = Seq(
 lazy val refined = Seq(
   "eu.timepit" %% "refined" % refinedV
 )
+
+dockerExposedPorts ++= Seq(8080)
