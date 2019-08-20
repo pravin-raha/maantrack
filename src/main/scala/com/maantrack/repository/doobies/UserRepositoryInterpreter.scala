@@ -11,8 +11,6 @@ import doobie.util.log.LogHandler
 import doobie.util.update.Update0
 import io.scalaland.chimney.dsl._
 
-import scala.language.higherKinds
-
 private object UserSql {
   def insert(userRequest: UserRequest): Update0 =
     sql"""INSERT INTO users (name, email, password, age, username, role)

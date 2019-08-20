@@ -15,8 +15,6 @@ import pureconfig.loadConfigOrThrow
 import tsec.passwordhashers.jca.BCrypt
 import pureconfig.generic.auto._
 
-import scala.language.higherKinds
-
 object Main extends IOApp {
 
   implicit def unsafeLogger: SelfAwareStructuredLogger[IO] =
@@ -41,8 +39,8 @@ object HttpServer {
       connEc <- ExecutionContexts.fixedThreadPool[F](
                  dataBaseConfig.poolSize
                )
-      txnEc <- ExecutionContexts.cachedThreadPool[F]
-      xa    <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, txnEc)
+      blocker <- Blocker[F]
+      xa      <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
 
       ctx = new Module(xa, BCrypt.syncPasswordHasher[F])
       _   <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))

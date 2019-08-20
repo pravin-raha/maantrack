@@ -7,31 +7,29 @@ import cats.implicits._
 import com.maantrack.auth.BearerToken
 import com.maantrack.domain.token.TokenRepository
 import doobie.hikari.HikariTransactor
-import doobie.implicits._
+import doobie.util.fragment.Fragment
 import doobie.util.log.LogHandler
 import doobie.{ Query0, Update0 }
 import tsec.common.SecureRandomId
+import doobie._
+import doobie.implicits._
 
 object BearerSQL {
+  import Fragments.whereAnd
+
   def byUserId(userId: Long): doobie.Query0[BearerToken] =
-    (select.toFragment ++ sql"""
-    where users_id = $userId
-  """).queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
+    (select ++ whereAnd(fr"  where users_id = $userId"))
+      .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def byId(secureId: SecureRandomId): Query0[BearerToken] =
-    (select.toFragment ++ sql"""
-    where secure_id = $secureId
-  """).queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
+    (select ++ whereAnd(fr"where secure_id = $secureId"))
+      .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
-  def select: Query0[BearerToken] = sql"""
-    select secure_id, users_id, expiry, last_touched
-    from token
-  """.queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
+  def select: Fragment = fr"select secure_id, users_id, expiry, last_touched from token"
 
   def byUsername(userId: String): Query0[BearerToken] =
-    (select.toFragment ++ sql"""
-    where users_id = $userId
-  """).queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
+    (select ++ whereAnd(fr"where users_id = $userId"))
+      .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def insert(u: BearerToken): Update0 = sql"""
     insert into token (secure_id, users_id, expiry, last_touched)

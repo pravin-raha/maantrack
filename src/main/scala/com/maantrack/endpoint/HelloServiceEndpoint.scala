@@ -11,8 +11,6 @@ import tsec.authentication.{ TSecAuthService, TSecBearerToken, _ }
 import tsec.common.Verified
 import tsec.passwordhashers.{ PasswordHash, PasswordHasher }
 
-import scala.language.higherKinds
-
 class HelloServiceEndpoint[F[_]: Sync, A](
   bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
   userService: UserService[F],
