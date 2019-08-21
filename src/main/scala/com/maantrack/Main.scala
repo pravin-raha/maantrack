@@ -42,7 +42,7 @@ object HttpServer {
       blocker <- Blocker[F]
       xa      <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
 
-      ctx = new Module(xa, BCrypt.syncPasswordHasher[F])
+      ctx = new Module(xa, BCrypt.syncPasswordHasher[F], blocker)
       _   <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
       server <- BlazeServerBuilder[F]
                  .bindHttp(serverConfig.port, serverConfig.host)
