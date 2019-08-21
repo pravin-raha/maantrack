@@ -1,6 +1,6 @@
 package com.maantrack.domain.organization
 
-import com.maantrack.domain.member.Membership
+import com.maantrack.domain.user.User
 
 case class Organization(
   organizationId: Long,
@@ -8,5 +8,5 @@ case class Organization(
   displayName: String,
   boardsIds: List[Long],
   name: String,
-  memberships: List[Membership]
+  users: List[User]
 )

@@ -1,25 +1,25 @@
-create table  if not exists users (
-    users_id bigserial primary key,
-    avatarUrl varchar,
-    avatarSource varchar,
+create table  if not exists user (
+    user_id bigserial primary key,
+    avatar_url varchar,
+    avatar_source varchar,
     bio text,
     confirmed boolean,
     email varchar not null,
     first_name varchar,
     last_name varchar,
-    member_type varchar,
+    user_type varchar,
     profile_url varchar,
     password varchar,
-    birthdate date,
-    username varchar not null,
-    created_date timestamptz not null,
-    modified_date timestamptz not null
+    birth_date date,
+    user_name varchar unique not null,
+    created_date timestamp not null,
+    modified_date timestamp not null
 );
 
 create table if not exists token (
 	token_id bigserial primary key,
 	secure_id bytea not null,
-	users_id bigint not null references users on delete cascade,
+	user_id bigint not null references user on delete cascade,
 	expiry timestamp with time zone not null,
 	last_touched timestamp with time zone
 );
@@ -31,8 +31,8 @@ create table organization(
     name varchar,
     organization_url varchar,
     website varchar,
-    created_date timestamptz not null,
-    modified_date timestamptz not null
+    created_date timestamp not null,
+    modified_date timestamp not null
 );
 
 create table board(
@@ -44,8 +44,8 @@ create table board(
     pinned boolean,
     board_url varchar,
     starred boolean,
-    created_date timestamptz not null,
-    modified_date timestamptz not null
+    created_date timestamp not null,
+    modified_date timestamp not null
 );
 
 create table list(
@@ -54,20 +54,20 @@ create table list(
     closed boolean,
     board_id bigint references board(board_id),
     pos int,
-    created_date timestamptz not null,
-    modified_date timestamptz not null
+    created_date timestamp not null,
+    modified_date timestamp not null
 );
 
 create table card(
     card_id bigserial primary key,
     closed boolean,
     description text,
-    due timestamptz,
+    due timestamp,
     due_completed boolean,
     board_id bigint references board(board_id),
     list_id bigint,
     name varchar,
     pos int,
-    created_date timestamptz not null,
-    modified_date timestamptz not null
+    created_date timestamp not null,
+    modified_date timestamp not null
 );

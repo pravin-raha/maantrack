@@ -18,7 +18,7 @@ import pureconfig.generic.auto._
 object Main extends IOApp {
 
   implicit def unsafeLogger: SelfAwareStructuredLogger[IO] =
-    Slf4jLogger.unsafeCreate[IO]
+    Slf4jLogger.getLogger[IO]
 
   override def run(args: List[String]): IO[ExitCode] =
     HttpServer.stream[IO, BCrypt].use(_ => IO.never).as(ExitCode.Success)
