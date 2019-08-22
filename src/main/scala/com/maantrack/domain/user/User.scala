@@ -61,7 +61,6 @@ case class UserCredential(userName: String, password: String)
 object Role extends SimpleAuthEnum[Role, String] {
   lazy val Customer: Role      = Role("User")
   lazy val Administrator: Role = Role("Administrator")
-  lazy val Seller: Role        = Role("Seller")
 
   implicit val E: Eq[Role] = Eq.fromUniversalEquals[Role]
   val AdminRequired: BasicRBAC[IO, Role, User, AugmentedJWT[HMACSHA256, Long]] =
@@ -72,7 +71,7 @@ object Role extends SimpleAuthEnum[Role, String] {
       Customer
     )
   protected val values: AuthGroup[Role] =
-    AuthGroup(Administrator, Customer, Seller)
+    AuthGroup(Administrator, Customer)
 
   override def getRepr(t: Role): String = t.roleRepr
 }

@@ -14,18 +14,13 @@ basePath: "/"
 tags:
   - name: "Maantrack"
     description: "Simple task tracking application"
-    externalDocs:
-      description: "Find out more"
-      url: "http://swagger.io"
-
   - name: "user"
     description: "Operations about user"
-    externalDocs:
-      description: "Find out more about our store"
-      url: "http://swagger.io"
+
 schemes:
-  - "https"
   - "http"
+  - "https"
+
 paths:
   /user:
     post:
@@ -42,31 +37,26 @@ paths:
           description: "Created user object"
           required: true
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/UserRequest"
       responses:
         default:
           description: "successful operation"
   /user/login:
-    get:
+    post:
       tags:
         - "user"
       summary: "Logs user into the system"
       description: ""
       operationId: "loginUser"
       produces:
-        - "application/xml"
         - "application/json"
       parameters:
-        - name: "username"
-          in: "query"
-          description: "The user name for login"
+        - in: "body"
+          name: "body"
+          description: "Created user object"
           required: true
-          type: "string"
-        - name: "password"
-          in: "query"
-          description: "The password for login in clear text"
-          required: true
-          type: "string"
+          schema:
+            $ref: '#/definitions/UserCredential'
       responses:
         200:
           description: "successful operation"
@@ -83,34 +73,21 @@ paths:
               description: "date in UTC when token expires"
         400:
           description: "Invalid username/password supplied"
-  /user/logout:
+  /user/{userId}:
     get:
       tags:
         - "user"
-      summary: "Logs out current logged in user session"
+      summary: "Get user by user id"
       description: ""
-      operationId: "logoutUser"
+      operationId: "getUserById"
+      security:
+        - api_key: []
       produces:
-        - "application/xml"
-        - "application/json"
-      parameters: []
-      responses:
-        default:
-          description: "successful operation"
-  /user/{username}:
-    get:
-      tags:
-        - "user"
-      summary: "Get user by user name"
-      description: ""
-      operationId: "getUserByName"
-      produces:
-        - "application/xml"
         - "application/json"
       parameters:
-        - name: "username"
+        - name: "userId"
           in: "path"
-          description: "The name that needs to be fetched. Use user1 for testing. "
+          description: "The user id that needs to be fetched. Use 1 for testing. "
           required: true
           type: "string"
       responses:
@@ -122,33 +99,9 @@ paths:
           description: "Invalid username supplied"
         404:
           description: "User not found"
-    put:
-      tags:
-        - "user"
-      summary: "Updated user"
-      description: "This can only be done by the logged in user."
-      operationId: "updateUser"
-      produces:
-        - "application/xml"
-        - "application/json"
-      parameters:
-        - name: "username"
-          in: "path"
-          description: "name that need to be updated"
-          required: true
-          type: "string"
-        - in: "body"
-          name: "body"
-          description: "Updated user object"
-          required: true
-          schema:
-            $ref: "#/definitions/User"
-      responses:
-        400:
-          description: "Invalid user supplied"
-        404:
-          description: "User not found"
     delete:
+      security:
+        - api_key: []
       tags:
         - "user"
       summary: "Delete user"
@@ -158,9 +111,9 @@ paths:
         - "application/xml"
         - "application/json"
       parameters:
-        - name: "username"
+        - name: "userId"
           in: "path"
-          description: "The name that needs to be deleted"
+          description: "The user id that needs to be deleted"
           required: true
           type: "string"
       responses:
@@ -169,18 +122,23 @@ paths:
         404:
           description: "User not found"
 securityDefinitions:
-  maantrack_auth:
-    type: "oauth2"
-    authorizationUrl: "http://petstore.swagger.io/oauth/dialog"
-    flow: "implicit"
-    scopes:
-      write:pets: "modify pets in your account"
-      read:pets: "read your pets"
   api_key:
     type: "apiKey"
-    name: "api_key"
     in: "header"
+    name: "authorization"
 definitions:
+  UserCredential:
+    type: "object"
+    required:
+      - "userName"
+      - "password"
+    properties:
+      userName:
+        type: "string"
+      password:
+        type: "string"
+    xml:
+      name: "UserCredential"
   User:
     type: "object"
     required:
@@ -203,15 +161,16 @@ definitions:
         type: "string"
       lastName:
         type: "string"
-      memberType:
+      userType:
         type: "string"
+        enum: [User, Administrator]
       profileUrl:
         type: "string"
       password:
         type: "string"
-      username:
+      userName:
         type: "string"
-      birthdate:
+      birthDate:
         type: "string"
         format: "date-time"
       boardIds:
@@ -230,6 +189,35 @@ definitions:
         format: "date-time"
     xml:
       name: "User"
+  UserRequest:
+    type: "object"
+    required:
+      - "userName"
+      - "email"
+      - "firsName"
+      - "lastName"
+      - "userType"
+      - "password"
+      - "birthDate"
+    properties:
+      email:
+        type: "string"
+      firsName:
+        type: "string"
+      lastName:
+        type: "string"
+      userType:
+        type: "string"
+        enum: [User, Administrator]
+      password:
+        type: "string"
+      userName:
+        type: "string"
+      birthDate:
+        type: "string"
+        format: "date-time"
+    xml:
+      name: "UserRequest"
   Organization:
     type: "object"
     properties:
@@ -344,7 +332,3 @@ definitions:
         format: "date-time"
     xml:
       name: "Card"
-
-externalDocs:
-  description: "Find out more about Swagger"
-  url: "http://swagger.io"

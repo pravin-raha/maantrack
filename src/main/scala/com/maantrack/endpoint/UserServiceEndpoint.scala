@@ -26,27 +26,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
 
   type AuthService = TSecAuthService[User, TSecBearerToken[Long], F]
 
-  val authService1: AuthService = TSecAuthService {
-    //Where user is the case class User above
-    case _ @GET -> Root / "api" asAuthed _ =>
-      /*
-      Note: The request is of type: SecuredRequest, which carries:
-      1. The request
-      2. The Authenticator (i.e token)
-      3. The identity (i.e in this case, User)
-       */
-      Ok()
-  }
-
-  val authedService2: AuthService = TSecAuthService {
-    case GET -> Root / "api2" asAuthed _ =>
-      Ok()
-  }
-
-  val liftedComposed: AuthService = authService1 <+> authedService2
-
-  val helloService: HttpRoutes[F] = HttpRoutes.of[F] {
-
+  private val userCreateService = HttpRoutes.of[F] {
     case req @ POST -> Root / "user" =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
@@ -65,8 +45,30 @@ class UserServiceEndpoint[F[_]: Sync, A](
             b      <- BadRequest()
           } yield b
       }
+  }
 
-    case req @ POST -> Root / "login" =>
+  private val uService: AuthService = TSecAuthService {
+    case GET -> Root / "user" / LongVar(userId) asAuthed _ =>
+      userService
+        .getUserById(userId)
+        .value
+        .flatMap {
+          case Some(user) => Ok(user.asJson)
+          case None       => NotFound(s"User with user id $userId not found".asJson)
+        }
+    case DELETE -> Root / "user" / LongVar(userId) asAuthed _ =>
+      userService
+        .deleteUserById(userId)
+        .value
+        .flatMap {
+          case Some(user) => Ok(user.asJson)
+          case None       => NotFound(s"User with user id $userId not found".asJson)
+        }
+  }
+
+  private val loginService: HttpRoutes[F] = HttpRoutes.of[F] {
+
+    case req @ POST -> Root / "user" / "login" =>
       val res: F[Response[F]] = for {
         userCredential <- req.as[UserCredential]
         user <- userService
@@ -91,8 +93,8 @@ class UserServiceEndpoint[F[_]: Sync, A](
       }
   }
 
-  def publicService: HttpRoutes[F] = helloService
-  def privateService: AuthService  = liftedComposed
+  val publicService: HttpRoutes[F] = loginService <+> userCreateService
+  val privateService: AuthService  = uService
 
 }
 
