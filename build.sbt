@@ -21,6 +21,7 @@ libraryDependencies ++= tsec
 libraryDependencies ++= doobie
 libraryDependencies ++= common
 libraryDependencies ++= refined
+libraryDependencies ++= webjar
 
 enablePlugins(JavaAppPackaging)
 
@@ -72,6 +73,11 @@ lazy val tsec = Seq(
 
 lazy val refined = Seq(
   "eu.timepit" %% "refined" % refinedV
+)
+
+lazy val webjar = Seq(
+  "org.webjars" % "webjars-locator" % "0.37",
+  "org.webjars" % "swagger-ui"      % "3.23.5"
 )
 
 dockerExposedPorts ++= Seq(8080)

@@ -18,7 +18,7 @@ import pureconfig.generic.auto._
 object Main extends IOApp {
 
   implicit def unsafeLogger: SelfAwareStructuredLogger[IO] =
-    Slf4jLogger.unsafeCreate[IO]
+    Slf4jLogger.getLogger[IO]
 
   override def run(args: List[String]): IO[ExitCode] =
     HttpServer.stream[IO, BCrypt].use(_ => IO.never).as(ExitCode.Success)
@@ -42,7 +42,7 @@ object HttpServer {
       blocker <- Blocker[F]
       xa      <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
 
-      ctx = new Module(xa, BCrypt.syncPasswordHasher[F])
+      ctx = new Module(xa, BCrypt.syncPasswordHasher[F], blocker)
       _   <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
       server <- BlazeServerBuilder[F]
                  .bindHttp(serverConfig.port, serverConfig.host)

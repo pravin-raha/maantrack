@@ -11,6 +11,6 @@ package object endpoint {
   implicit def userRequestDecoder[F[_]: Sync]: EntityDecoder[F, UserRequest] =
     jsonOf[F, UserRequest]
 
-  implicit def userCreadential[F[_]: Sync]: EntityDecoder[F, UserCredential] =
+  implicit def userCredential[F[_]: Sync]: EntityDecoder[F, UserCredential] =
     jsonOf[F, UserCredential]
 }

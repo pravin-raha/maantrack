@@ -1,0 +1,334 @@
+swagger: "2.0"
+info:
+  description: "Maantrack."
+  version: "1.0.0"
+  title: "Maantrack"
+  termsOfService: ""
+  contact:
+    email: "pravinrahanagdale41@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "localhost:8080"
+basePath: "/"
+tags:
+  - name: "Maantrack"
+    description: "Simple task tracking application"
+  - name: "user"
+    description: "Operations about user"
+
+schemes:
+  - "http"
+  - "https"
+
+paths:
+  /user:
+    post:
+      tags:
+        - "user"
+      summary: "Create user"
+      description: "This can only be done by the logged in user."
+      operationId: "createUser"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Created user object"
+          required: true
+          schema:
+            $ref: "#/definitions/UserRequest"
+      responses:
+        default:
+          description: "successful operation"
+  /user/login:
+    post:
+      tags:
+        - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Created user object"
+          required: true
+          schema:
+            $ref: '#/definitions/UserCredential'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+          headers:
+            X-Rate-Limit:
+              type: "integer"
+              format: "int32"
+              description: "calls per hour allowed by the user"
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        400:
+          description: "Invalid username/password supplied"
+  /user/{userId}:
+    get:
+      tags:
+        - "user"
+      summary: "Get user by user id"
+      description: ""
+      operationId: "getUserById"
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "userId"
+          in: "path"
+          description: "The user id that needs to be fetched. Use 1 for testing. "
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/User"
+        400:
+          description: "Invalid username supplied"
+        404:
+          description: "User not found"
+    delete:
+      security:
+        - api_key: []
+      tags:
+        - "user"
+      summary: "Delete user"
+      description: "This can only be done by the logged in user."
+      operationId: "deleteUser"
+      produces:
+        - "application/xml"
+        - "application/json"
+      parameters:
+        - name: "userId"
+          in: "path"
+          description: "The user id that needs to be deleted"
+          required: true
+          type: "string"
+      responses:
+        400:
+          description: "Invalid username supplied"
+        404:
+          description: "User not found"
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    in: "header"
+    name: "authorization"
+definitions:
+  UserCredential:
+    type: "object"
+    required:
+      - "userName"
+      - "password"
+    properties:
+      userName:
+        type: "string"
+      password:
+        type: "string"
+    xml:
+      name: "UserCredential"
+  User:
+    type: "object"
+    required:
+      - "username"
+    properties:
+      usersId:
+        type: "integer"
+        format: "int64"
+      avatarUrl:
+        type: "string"
+      avatarSource:
+        type: "string"
+      bio:
+        type: "string"
+      confirmed:
+        type: "string"
+      email:
+        type: "string"
+      firsName:
+        type: "string"
+      lastName:
+        type: "string"
+      userType:
+        type: "string"
+        enum: [User, Administrator]
+      profileUrl:
+        type: "string"
+      password:
+        type: "string"
+      userName:
+        type: "string"
+      birthDate:
+        type: "string"
+        format: "date-time"
+      boardIds:
+        type: "array"
+        items:
+          type: "integer"
+      organizationIds:
+        type: "array"
+        items:
+          type: "integer"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      modifiedDate:
+        type: "string"
+        format: "date-time"
+    xml:
+      name: "User"
+  UserRequest:
+    type: "object"
+    required:
+      - "userName"
+      - "email"
+      - "firsName"
+      - "lastName"
+      - "userType"
+      - "password"
+      - "birthDate"
+    properties:
+      email:
+        type: "string"
+      firsName:
+        type: "string"
+      lastName:
+        type: "string"
+      userType:
+        type: "string"
+        enum: [User, Administrator]
+      password:
+        type: "string"
+      userName:
+        type: "string"
+      birthDate:
+        type: "string"
+        format: "date-time"
+    xml:
+      name: "UserRequest"
+  Organization:
+    type: "object"
+    properties:
+      organizationId:
+        type: "integer"
+        format: "int64"
+      description:
+        type: "string"
+      displayName:
+        type: "string"
+      name:
+        type: "string"
+      organizationUrl:
+        type: "string"
+      website:
+        type: "string"
+      boardIds:
+        type: "array"
+        items:
+          type: "integer"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      modifiedDate:
+        type: "string"
+        format: "date-time"
+    xml:
+      name: "Organization"
+  Board:
+    type: "object"
+    properties:
+      boardId:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      description:
+        type: "string"
+      closed:
+        type: "boolean"
+      organizationId:
+        type: "integer"
+      pinned:
+        type: "boolean"
+      boardUrl:
+        type: "string"
+      starred:
+        type: "boolean"
+      userIds:
+        type: "array"
+        items:
+          type: "integer"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      modifiedDate:
+        type: "string"
+        format: "date-time"
+    xml:
+      name: "Board"
+  List:
+    type: "object"
+    properties:
+      listId:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      closed:
+        type: "boolean"
+      boardId:
+        type: "integer"
+      pos:
+        type: "integer"
+        format: "int64"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      modifiedDate:
+        type: "string"
+        format: "date-time"
+    xml:
+      name: "List"
+  Card:
+    type: "object"
+    properties:
+      cardId:
+        type: "integer"
+        format: "int64"
+      description:
+        type: "string"
+      closed:
+        type: "boolean"
+      due:
+        type: "string"
+        format: "date-time"
+      dueCompleted:
+        type: "boolean"
+      boardId:
+        type: "integer"
+      listId:
+        type: "integer"
+      name:
+        type: "string"
+      pos:
+        type: "integer"
+      createdDate:
+        type: "string"
+        format: "date-time"
+      modifieDate:
+        type: "string"
+        format: "date-time"
+    xml:
+      name: "Card"

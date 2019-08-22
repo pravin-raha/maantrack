@@ -1,11 +1,11 @@
 package com.maantrack
 
-import cats.effect.{ Async, ConcurrentEffect }
+import cats.effect.{ Async, Blocker, ConcurrentEffect, ContextShift }
 import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
 import com.maantrack.domain.token.TokenService
 import com.maantrack.domain.user.{ User, UserService }
-import com.maantrack.endpoint.HelloServiceEndpoint
+import com.maantrack.endpoint.{ UserServiceEndpoint, SwaggerUIServiceEndpoint }
 import com.maantrack.repository.doobies.{ TokenRepositoryInterpreter, UserRepositoryInterpreter }
 import doobie.hikari.HikariTransactor
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
@@ -18,13 +18,15 @@ import scala.concurrent.duration._
 
 class Module[F[_]: Async, A](
   xa: HikariTransactor[F],
-  hasher: PasswordHasher[F, A]
+  hasher: PasswordHasher[F, A],
+  blocker: Blocker
 )(
-  implicit F: ConcurrentEffect[F]
+  implicit F: ConcurrentEffect[F],
+  cs: ContextShift[F]
 ) {
 
   implicit def unsafeLogger: SelfAwareStructuredLogger[F] =
-    Slf4jLogger.unsafeCreate[F]
+    Slf4jLogger.getLogger[F]
 
   private lazy val userRepoInterpreter: UserRepositoryInterpreter[F] =
     UserRepositoryInterpreter(xa = xa)
@@ -57,14 +59,16 @@ class Module[F[_]: Async, A](
   private val Auth: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]] =
     SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]](bearerTokenAuth)
 
-  private val helloEndpoint: HelloServiceEndpoint[F, A] =
-    HelloServiceEndpoint(
+  private val helloEndpoint: UserServiceEndpoint[F, A] =
+    UserServiceEndpoint(
       bearerTokenAuth,
       userService,
       hasher
     )
 
-  val httpEndpoint: HttpRoutes[F] = helloEndpoint.publicService <+> Auth
+  private val swaggerEndpoint: SwaggerUIServiceEndpoint[F] = SwaggerUIServiceEndpoint(blocker)
+
+  val httpEndpoint: HttpRoutes[F] = swaggerEndpoint.service <+> helloEndpoint.publicService <+> Auth
     .liftService(helloEndpoint.privateService)
 
 }

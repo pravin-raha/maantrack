@@ -1,5 +1,7 @@
 package com.maantrack.repository.doobies
 
+import java.time.Instant
+
 import cats._
 import cats.data.OptionT
 import cats.effect.Async
@@ -7,35 +9,49 @@ import cats.implicits._
 import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
+import doobie.util.Meta
 import doobie.util.log.LogHandler
 import doobie.util.update.Update0
 import io.scalaland.chimney.dsl._
 
 private object UserSql {
+  private val now = Instant.now()
+
+  implicit val DateTimeMeta: Meta[Instant] =
+    Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
+
   def insert(userRequest: UserRequest): Update0 =
-    sql"""INSERT INTO users (name, email, password, age, username, role)
-          VALUES (${userRequest.name}, ${userRequest.email}, ${userRequest.password},
-          ${userRequest.age},${userRequest.userName},${userRequest.role.roleRepr})"""
+    sql"""INSERT INTO user
+         ( email, first_name, last_name, user_type, password, birth_date,
+           user_name, created_date, modified_date )
+         VALUES
+           (
+             ${userRequest.email}, ${userRequest.firsName}, ${userRequest.lastName}, ${userRequest.userType}
+           , ${userRequest.password}, ${userRequest.birthDate}
+           , ${userRequest.userName}, $now, $now
+           )"""
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def select(id: Long): doobie.Query0[User] = sql"""
-      SELECT users_id, age, name, username, role, password, email
-      FROM users
-      WHERE users_id = $id
+      SELECT user_id, avatar_url, avatar_source, bio, confirmed , email, first_name, last_name,
+      user_type, profile_url, password, user_name, birth_date, created_date, modified_date
+      FROM user
+      WHERE user_id = $id
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
 
   def delete(id: Long): doobie.Update0 =
-    sql"DELETE FROM users WHERE users_id = $id"
+    sql"DELETE FROM user WHERE user_id = $id"
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def update(user: User): doobie.Update0 =
-    sql"UPDATE users set users_id = ${user.id}, name = ${user.name}, email = ${user.email} WHERE user_id = ${user.id}"
+    sql"UPDATE user set user_id = ${user.userId}, name = ${user.firsName}, email = ${user.email} WHERE user_id = ${user.userId}"
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def selectByUserName(username: String): doobie.Query0[User] = sql"""
-      SELECT users_id, age, name, username, role, password, email
-      FROM users
-      WHERE username = $username
+      select user_id, avatar_url, avatar_source, bio, confirmed , email, first_name, last_name,
+      user_type, profile_url, password, user_name, birth_date, created_date, modified_date
+      from user
+      where user_name = $username
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
 }
 
@@ -43,10 +59,20 @@ class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends Us
 
   import UserSql._
 
+  private val now = Instant.now()
+
   override def addUser(userRequest: UserRequest): F[User] =
     insert(userRequest)
-      .withUniqueGeneratedKeys[Long]("users_id")
-      .map(id => userRequest.into[User].withFieldConst(_.id, id).transform)
+      .withUniqueGeneratedKeys[Long]("user_id")
+      .map(
+        id =>
+          userRequest
+            .into[User]
+            .withFieldConst(_.userId, id)
+            .withFieldConst(_.modifiedDate, now)
+            .withFieldConst(_.createdDate, now)
+            .transform
+      )
       .transact(xa)
 
   override def deleteUserById(id: Long): OptionT[F, User] =
