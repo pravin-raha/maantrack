@@ -8,13 +8,18 @@ import cats.effect.Async
 import cats.implicits._
 import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
 import doobie.hikari.HikariTransactor
+import doobie._
 import doobie.implicits._
+import doobie.util.Meta
 import doobie.util.log.LogHandler
 import doobie.util.update.Update0
 import io.scalaland.chimney.dsl._
 
 private object UserSql {
   private val now = Instant.now()
+
+  implicit val DateTimeMeta: Meta[Instant] =
+    Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
 
   def insert(userRequest: UserRequest): Update0 =
     sql"""INSERT INTO user
@@ -29,23 +34,25 @@ private object UserSql {
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def select(id: Long): doobie.Query0[User] = sql"""
-      SELECT user_id, age, name, username, role, password, email
+      SELECT user_id, avatar_url, avatar_source, bio, confirmed , email, first_name, last_name,
+      user_type, profile_url, password, user_name, birth_date, created_date, modified_date
       FROM user
       WHERE user_id = $id
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
 
   def delete(id: Long): doobie.Update0 =
-    sql"DELETE FROM users WHERE users_id = $id"
+    sql"DELETE FROM user WHERE user_id = $id"
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def update(user: User): doobie.Update0 =
-    sql"UPDATE user set user_id = ${user.usersId}, name = ${user.firsName}, email = ${user.email} WHERE user_id = ${user.usersId}"
+    sql"UPDATE user set user_id = ${user.userId}, name = ${user.firsName}, email = ${user.email} WHERE user_id = ${user.userId}"
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def selectByUserName(username: String): doobie.Query0[User] = sql"""
-      SELECT user_id, age, name, username, role, password, email
-      FROM user
-      WHERE username = $username
+      select user_id, avatar_url, avatar_source, bio, confirmed , email, first_name, last_name,
+      user_type, profile_url, password, user_name, birth_date, created_date, modified_date
+      from user
+      where user_name = $username
     """.queryWithLogHandler[User](LogHandler.jdkLogHandler)
 }
 
@@ -62,7 +69,7 @@ class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends Us
         id =>
           userRequest
             .into[User]
-            .withFieldConst(_.usersId, id)
+            .withFieldConst(_.userId, id)
             .withFieldConst(_.modifiedDate, now)
             .withFieldConst(_.createdDate, now)
             .transform

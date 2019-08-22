@@ -12,11 +12,11 @@ import tsec.mac.jca.HMACSHA256
 sealed case class Role(roleRepr: String)
 
 case class User(
-  usersId: Long,
+  userId: Long,
   avatarUrl: Option[String] = None,
   avatarSource: Option[String] = None,
   bio: Option[String] = None,
-  confirmed: Boolean = false,
+  confirmed: Option[Boolean] = Some(false),
   email: String,
   firsName: String,
   lastName: String,
@@ -40,14 +40,14 @@ case class UserRequest(
 )
 
 case class UserResponse(
-  usersId: Long,
+  userId: Long,
   avatarUrl: Option[String] = None,
   avatarSource: Option[String] = None,
   bio: Option[String] = None,
-  confirmed: Boolean = false,
+  confirmed: Option[Boolean] = Some(false),
   email: String,
   firsName: String,
-  lastName: String,
+  lastName: Option[String] = None,
   userType: Role = Role.Customer,
   profileUrl: Option[String] = None,
   userName: String,

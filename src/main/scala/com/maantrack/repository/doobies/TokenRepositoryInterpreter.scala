@@ -1,5 +1,7 @@
 package com.maantrack.repository.doobies
 
+import java.time.Instant
+
 import cats.Monad
 import cats.data.OptionT
 import cats.effect.Async
@@ -13,19 +15,23 @@ import doobie.{ Query0, Update0 }
 import tsec.common.SecureRandomId
 import doobie._
 import doobie.implicits._
+import doobie.util.Meta
 
 object BearerSQL {
   import Fragments.whereAnd
 
+  implicit val DateTimeMeta: Meta[Instant] =
+    Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
+
   def byUserId(userId: Long): doobie.Query0[BearerToken] =
-    (select ++ whereAnd(fr"  where user_id = $userId"))
+    (select ++ whereAnd(fr"where user_id = $userId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def byId(secureId: SecureRandomId): Query0[BearerToken] =
     (select ++ whereAnd(fr"where secure_id = $secureId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
-  def select: Fragment = fr"select secure_id, user_id, expiry, last_touched from token"
+  def select: Fragment = fr"select secure_id, user_id, expiry, last_touched from token "
 
   def byUsername(userId: String): Query0[BearerToken] =
     (select ++ whereAnd(fr"where user_id = $userId"))

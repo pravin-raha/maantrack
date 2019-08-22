@@ -15,7 +15,7 @@ import io.circe.syntax._
 import org.http4s.circe._
 import io.scalaland.chimney.dsl._
 
-class HelloServiceEndpoint[F[_]: Sync, A](
+class UserServiceEndpoint[F[_]: Sync, A](
   bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
   userService: UserService[F],
   hasher: PasswordHasher[F, A]
@@ -78,7 +78,7 @@ class HelloServiceEndpoint[F[_]: Sync, A](
         status <- hasher.checkpw(userCredential.password.getBytes, hash)
         resp <- if (status == Verified) Ok()
                else Sync[F].raiseError[Response[F]](Error.BadLogin())
-        tok <- bearerTokenAuth.create(user.usersId)
+        tok <- bearerTokenAuth.create(user.userId)
       } yield bearerTokenAuth.embed(resp, tok)
 
       res.recoverWith {
@@ -96,15 +96,15 @@ class HelloServiceEndpoint[F[_]: Sync, A](
 
 }
 
-object HelloServiceEndpoint {
+object UserServiceEndpoint {
   def apply[F[_]: Async, A](
     bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
     userService: UserService[F],
     hasher: PasswordHasher[F, A]
   )(
     implicit F: ConcurrentEffect[F]
-  ): HelloServiceEndpoint[F, A] =
-    new HelloServiceEndpoint(
+  ): UserServiceEndpoint[F, A] =
+    new UserServiceEndpoint(
       bearerTokenAuth,
       userService,
       hasher

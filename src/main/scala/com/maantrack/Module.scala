@@ -5,7 +5,7 @@ import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
 import com.maantrack.domain.token.TokenService
 import com.maantrack.domain.user.{ User, UserService }
-import com.maantrack.endpoint.{ HelloServiceEndpoint, SwaggerUIServiceEndpoint }
+import com.maantrack.endpoint.{ UserServiceEndpoint, SwaggerUIServiceEndpoint }
 import com.maantrack.repository.doobies.{ TokenRepositoryInterpreter, UserRepositoryInterpreter }
 import doobie.hikari.HikariTransactor
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
@@ -59,8 +59,8 @@ class Module[F[_]: Async, A](
   private val Auth: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]] =
     SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]](bearerTokenAuth)
 
-  private val helloEndpoint: HelloServiceEndpoint[F, A] =
-    HelloServiceEndpoint(
+  private val helloEndpoint: UserServiceEndpoint[F, A] =
+    UserServiceEndpoint(
       bearerTokenAuth,
       userService,
       hasher
