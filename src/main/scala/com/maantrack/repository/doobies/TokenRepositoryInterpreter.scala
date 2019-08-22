@@ -24,17 +24,17 @@ object BearerSQL {
     Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
 
   def byUserId(userId: Long): doobie.Query0[BearerToken] =
-    (select ++ whereAnd(fr"where user_id = $userId"))
+    (select ++ whereAnd(fr"user_id = $userId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def byId(secureId: SecureRandomId): Query0[BearerToken] =
-    (select ++ whereAnd(fr"where secure_id = $secureId"))
+    (select ++ whereAnd(fr"secure_id = $secureId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def select: Fragment = fr"select secure_id, user_id, expiry, last_touched from token "
 
   def byUsername(userId: String): Query0[BearerToken] =
-    (select ++ whereAnd(fr"where user_id = $userId"))
+    (select ++ whereAnd(fr"user_id = $userId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def insert(u: BearerToken): Update0 = sql"""
