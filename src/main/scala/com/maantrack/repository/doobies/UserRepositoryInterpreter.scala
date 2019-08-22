@@ -8,7 +8,6 @@ import cats.effect.Async
 import cats.implicits._
 import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
 import doobie.hikari.HikariTransactor
-import doobie._
 import doobie.implicits._
 import doobie.util.Meta
 import doobie.util.log.LogHandler
