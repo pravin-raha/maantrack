@@ -53,7 +53,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
         .getUserById(userId)
         .value
         .flatMap {
-          case Some(user) => Ok(user.asJson)
+          case Some(user) => Ok(user.into[UserResponse].transform.asJson)
           case None       => NotFound(s"User with user id $userId not found".asJson)
         }
     case DELETE -> Root / "user" / LongVar(userId) asAuthed _ =>
@@ -61,7 +61,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
         .deleteUserById(userId)
         .value
         .flatMap {
-          case Some(user) => Ok(user.asJson)
+          case Some(user) => Ok(user.into[UserResponse].transform.asJson)
           case None       => NotFound(s"User with user id $userId not found".asJson)
         }
   }
