@@ -98,3 +98,6 @@ resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 sonarUseExternalConfig := true
 coverageEnabled := true
 coverageHighlighting := true
+
+addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
+addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")

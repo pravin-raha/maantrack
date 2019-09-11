@@ -10,7 +10,7 @@ jdk:
 jobs:
   include:
     - env: TEST="scalafmt"
-      script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck
+      script: sbt ++$TRAVIS_SCALA_VERSION check
     - env: TEST="compilation"
       script: sbt ++$TRAVIS_SCALA_VERSION compile test
 
