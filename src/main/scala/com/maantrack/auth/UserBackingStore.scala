@@ -23,13 +23,13 @@ object UserBackingStore {
           .updateUser(user)
           .toRight(Error.NotFound(): Throwable)
           .value
-          .flatMap(_.raiseOrPure[M])
+          .flatMap(_.liftTo[M])
       def delete(id: Long): M[Unit] =
         userService
           .deleteUserById(id)
           .toRight(Error.NotFound(): Throwable)
           .value
-          .flatMap(_.raiseOrPure[M])
+          .flatMap(_.liftTo[M])
           .map(_ => ())
     }
 }

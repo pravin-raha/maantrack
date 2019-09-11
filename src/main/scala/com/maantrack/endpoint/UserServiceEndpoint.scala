@@ -75,7 +75,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
                  .getUserByUserName(userCredential.userName)
                  .toRight(Error.NotFound(): Throwable)
                  .value
-                 .flatMap(_.raiseOrPure[F])
+                 .flatMap(_.liftTo[F])
         hash   = PasswordHash[A](user.password)
         status <- hasher.checkpw(userCredential.password.getBytes, hash)
         resp <- if (status == Verified) Ok()
