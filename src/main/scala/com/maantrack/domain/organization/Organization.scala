@@ -1,6 +1,7 @@
 package com.maantrack.domain.organization
 
 import com.maantrack.domain.user.User
+import java.time.Instant
 
 case class Organization(
   organizationId: Long,
@@ -8,5 +9,7 @@ case class Organization(
   displayName: String,
   boardsIds: List[Long],
   name: String,
-  users: List[User]
+  users: List[User],
+  createdDate: Instant,
+  modifiedDate: Instant
 )
