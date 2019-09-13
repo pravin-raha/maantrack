@@ -1,13 +1,14 @@
 package com.maantrack.domain.organization
+import cats.data.OptionT
 import cats.effect.Async
 
-class OrganizationRepositoryService[F[_]: Async](organizationRepository: OrganizationRepository[F]) {
+class OrganizationService[F[_]: Async](organizationRepository: OrganizationRepository[F]) {
 
-  def getById(id: Long) = organizationRepository.getById(id)
+  def getById(id: Long): OptionT[F, Organization] = organizationRepository.getById(id)
 
   def add(orgRequest: OrganizationRequest): F[Long] = organizationRepository.add(orgRequest)
 
-  def update(organization: Organization): F[Unit] = organizationRepository.update(organization)
+  def update(organization: Organization): F[Int] = organizationRepository.update(organization)
 
-  def deleteById(id: Long): F[Unit] = organizationRepository.deleteById(id)
+  def deleteById(id: Long): F[Int] = organizationRepository.deleteById(id)
 }

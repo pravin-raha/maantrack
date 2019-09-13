@@ -1,4 +1,5 @@
 package com.maantrack.repository.doobies
+
 import cats.data.OptionT
 import cats.effect.Async
 import com.maantrack.domain.board.{ Board, BoardRepository, BoardRequest }
