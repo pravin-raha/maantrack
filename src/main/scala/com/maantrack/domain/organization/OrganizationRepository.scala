@@ -7,7 +7,7 @@ trait OrganizationRepository[F[_]] {
 
   def getById(id: Long): OptionT[F, Organization]
 
-  def deleteById(id: Long): F[Unit]
+  def deleteById(id: Long): F[Int]
 
-  def update(organization: Organization): F[Unit]
+  def update(organization: Organization): F[Int]
 }

@@ -9,16 +9,12 @@ import cats.implicits._
 import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
-import doobie.util.Meta
 import doobie.util.log.LogHandler
 import doobie.util.update.Update0
 import io.scalaland.chimney.dsl._
 
 private object UserSql {
   private val now = Instant.now()
-
-  implicit val DateTimeMeta: Meta[Instant] =
-    Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
 
   def insert(userRequest: UserRequest): Update0 =
     sql"""INSERT INTO user
