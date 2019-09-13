@@ -1,7 +1,5 @@
 package com.maantrack.repository.doobies
 
-import java.time.Instant
-
 import cats.Monad
 import cats.data.OptionT
 import cats.effect.Async
@@ -9,19 +7,14 @@ import cats.implicits._
 import com.maantrack.auth.BearerToken
 import com.maantrack.domain.token.TokenRepository
 import doobie.hikari.HikariTransactor
+import doobie.implicits._
 import doobie.util.fragment.Fragment
 import doobie.util.log.LogHandler
-import doobie.{ Query0, Update0 }
+import doobie.{ Query0, Update0, _ }
 import tsec.common.SecureRandomId
-import doobie._
-import doobie.implicits._
-import doobie.util.Meta
 
 object BearerSQL {
   import Fragments.whereAnd
-
-  implicit val DateTimeMeta: Meta[Instant] =
-    Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
 
   def byUserId(userId: Long): doobie.Query0[BearerToken] =
     (select ++ whereAnd(fr"user_id = $userId"))
