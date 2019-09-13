@@ -1,22 +1,41 @@
 package com.maantrack.repository.doobies
 
+import java.time.Instant
+
 import cats.data.OptionT
+import cats.implicits._
 import cats.effect.Async
 import com.maantrack.domain.organization.{ Organization, OrganizationRepository, OrganizationRequest }
+import com.maantrack.domain.user.User
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
 import doobie.util.log.LogHandler
-import doobie.{ Fragments, Query0, Update0 }
+import doobie.{ Fragments, Update0 }
 
 object OrganizationSQL {
+
   import Fragments.whereAnd
 
-  def byId(id: Long): Query0[Organization] =
-    (select ++ whereAnd(fr"organization_id = $id"))
-      .queryWithLogHandler[Organization](LogHandler.jdkLogHandler)
+  def byId[F[_]: Async](id: Long)(xa: HikariTransactor[F]): F[Option[Organization]] =
+    select(select ++ whereAnd(fr"organization_id = $id"))(xa)
+      .map(_.headOption)
 
-  private def select: Fragment =
+  def select[F[_]: Async](f: Fragment)(xa: HikariTransactor[F]): F[List[Organization]] =
+    f.queryWithLogHandler[(Long, String, String, String, String, String, Instant, Instant, Long, User)](
+        LogHandler.jdkLogHandler
+      )
+      .stream
+      .compile
+      .toList
+      .map(
+        _.groupMap(d => (d._1, d._2, d._3, d._4, d._5, d._6, d._7, d._8))(v => (v._9, v._10)).toList.map {
+          case (k, v) => Organization(k._1, k._2, k._3, v.map(_._1), k._4, k._5, k._6, v.map(_._2), k._7, k._8)
+        }
+      )
+      .transact(xa)
+
+  private val select: Fragment =
     fr"""
         select
          organization_id ,description ,display_name, name, organization_url, website, created_date, modified_date
@@ -54,7 +73,7 @@ class OrganizationRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) ex
       .withUniqueGeneratedKeys[Long]("organization_id")
       .transact(xa)
 
-  override def getById(id: Long): OptionT[F, Organization] = OptionT(byId(id).option.transact(xa))
+  override def getById(id: Long): OptionT[F, Organization] = OptionT(byId(id)(xa))
 
   override def deleteById(id: Long): F[Int] = delete(id).run.transact(xa)
 
