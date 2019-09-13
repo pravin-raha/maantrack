@@ -13,3 +13,15 @@ case class Board(
   createdDate: Instant,
   modifiedDate: Instant
 )
+
+case class BoardRequest(
+  name: String,
+  description: String,
+  closed: Boolean,
+  organizationId: Long,
+  pinned: Boolean,
+  boardUrl: String,
+  starred: Boolean,
+  createdDate: Instant,
+  modifiedDate: Instant
+)

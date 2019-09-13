@@ -14,3 +14,16 @@ case class Card(
   createdDate: Instant,
   modifiedDate: Instant
 )
+
+case class CardRequest(
+  closed: Boolean,
+  description: String,
+  due: Instant,
+  dueCompleted: Boolean,
+  boardId: Long,
+  listId: Long,
+  name: String,
+  pos: Int,
+  createdDate: Instant,
+  modifiedDate: Instant
+)

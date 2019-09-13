@@ -10,3 +10,12 @@ case class List(
   createdDate: Instant,
   modifiedDate: Instant
 )
+
+case class ListRequest(
+  name: String,
+  closed: Boolean,
+  boardId: Long,
+  pos: Int,
+  createdDate: Instant,
+  modifiedDate: Instant
+)
