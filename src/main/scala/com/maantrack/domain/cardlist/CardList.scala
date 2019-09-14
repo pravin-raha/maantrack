@@ -1,7 +1,7 @@
-package com.maantrack.domain.list
+package com.maantrack.domain.cardlist
 import java.time.Instant
 
-case class List(
+case class CardList(
   listId: Long,
   name: String,
   closed: Boolean,
@@ -11,7 +11,7 @@ case class List(
   modifiedDate: Instant
 )
 
-case class ListRequest(
+case class CardListRequest(
   name: String,
   closed: Boolean,
   boardId: Long,
