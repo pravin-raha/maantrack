@@ -17,21 +17,21 @@ object BearerSQL {
   import Fragments.whereAnd
 
   def byUserId(userId: Long): doobie.Query0[BearerToken] =
-    (select ++ whereAnd(fr"user_id = $userId"))
+    (select ++ whereAnd(fr"app_user_id = $userId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def byId(secureId: SecureRandomId): Query0[BearerToken] =
     (select ++ whereAnd(fr"secure_id = $secureId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
-  def select: Fragment = fr"select secure_id, user_id, expiry, last_touched from token "
+  def select: Fragment = fr"select secure_id, app_user_id, expiry, last_touched from token "
 
   def byUsername(userId: String): Query0[BearerToken] =
-    (select ++ whereAnd(fr"user_id = $userId"))
+    (select ++ whereAnd(fr"app_user_id = $userId"))
       .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
 
   def insert(u: BearerToken): Update0 = sql"""
-    insert into token (secure_id, user_id, expiry, last_touched)
+    insert into token (secure_id, app_user_id, expiry, last_touched)
     values (${u.id}, ${u.identity}, ${u.expiry}, ${u.lastTouched})
   """.update
 
