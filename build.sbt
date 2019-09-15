@@ -13,10 +13,10 @@ lazy val circeConfigVersion   = "0.7.0-M1"
 lazy val refinedVersion       = "0.9.9"
 lazy val catsVersion          = "2.0.0"
 lazy val pureConfigVersion    = "0.11.1"
-lazy val log4catsSlf4jVersion = "1.0.0-RC1"
+lazy val log4catsSlf4jVersion = "1.0.0"
 lazy val chimneyVersion       = "0.3.2"
 lazy val scalaCheckVersion    = "1.14.0"
-lazy val scalaTestVersion     = "3.1.0-SNAP13"
+lazy val scalaTestVersion     = "3.1.0-M2"
 lazy val scalacticVersion     = "3.0.8"
 
 libraryDependencies ++= http4s
@@ -93,7 +93,7 @@ lazy val testDependencies = Seq(
 dockerExposedPorts ++= Seq(8080)
 
 resolvers += Resolver.sonatypeRepo("releases")
-resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
+resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases"
 
 sonarUseExternalConfig := true
 coverageEnabled := true
