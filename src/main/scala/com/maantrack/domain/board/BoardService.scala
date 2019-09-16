@@ -7,9 +7,9 @@ class BoardService[F[_]: Async](boardRepository: BoardRepository[F]) {
 
   def getById(id: Long): OptionT[F, Board] = boardRepository.getById(id)
 
-  def add(boardRequest: BoardRequest): F[Long] = boardRepository.add(boardRequest)
+  def add(userId: Long, boardRequest: BoardRequest): F[Long] = boardRepository.add(userId, boardRequest)
 
   def update(board: Board): F[Int] = boardRepository.update(board)
 
-  def deleteById(id: Long): F[Int] = boardRepository.deleteById(id)
+  def deleteById(id: Long): OptionT[F, Board] = boardRepository.deleteById(id)
 }

@@ -3,17 +3,17 @@ package com.maantrack.endpoint
 import cats.effect._
 import cats.implicits._
 import com.maantrack.domain.Error
-import com.maantrack.domain.user.{ User, UserCredential, UserRequest, UserResponse, UserService }
+import com.maantrack.domain.user._
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import org.http4s.dsl.Http4sDsl
-import org.http4s.{ EntityDecoder, HttpRoutes, Response }
-import tsec.authentication.{ TSecAuthService, TSecBearerToken, _ }
-import tsec.common.Verified
-import tsec.passwordhashers.{ PasswordHash, PasswordHasher }
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.http4s.circe._
 import io.scalaland.chimney.dsl._
+import org.http4s.circe._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.{ HttpRoutes, Response }
+import tsec.authentication.{ TSecAuthService, _ }
+import tsec.common.Verified
+import tsec.passwordhashers.{ PasswordHash, PasswordHasher }
 
 class UserServiceEndpoint[F[_]: Sync, A](
   bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
@@ -22,12 +22,8 @@ class UserServiceEndpoint[F[_]: Sync, A](
 )(implicit F: ConcurrentEffect[F])
     extends Http4sDsl[F] {
 
-  implicit val orderDecoder: EntityDecoder[F, UserResponse] = jsonOf
-
-  type AuthService = TSecAuthService[User, TSecBearerToken[Long], F]
-
   private val userCreateService = HttpRoutes.of[F] {
-    case req @ POST -> Root / "user" =>
+    case req @ POST -> Root =>
       val res: F[Response[F]] = for {
         userRequest <- req.as[UserRequest]
         hash        <- hasher.hashpw(userRequest.password.getBytes)
@@ -47,8 +43,8 @@ class UserServiceEndpoint[F[_]: Sync, A](
       }
   }
 
-  private val uService: AuthService = TSecAuthService {
-    case GET -> Root / "user" / LongVar(userId) asAuthed _ =>
+  private val uService: AuthService[F] = TSecAuthService {
+    case GET -> Root / LongVar(userId) asAuthed _ =>
       userService
         .getUserById(userId)
         .value
@@ -56,7 +52,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
           case Some(user) => Ok(user.into[UserResponse].transform.asJson)
           case None       => NotFound(s"User with user id $userId not found".asJson)
         }
-    case DELETE -> Root / "user" / LongVar(userId) asAuthed _ =>
+    case DELETE -> Root / LongVar(userId) asAuthed _ =>
       userService
         .deleteUserById(userId)
         .value
@@ -68,7 +64,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
 
   private val loginService: HttpRoutes[F] = HttpRoutes.of[F] {
 
-    case req @ POST -> Root / "user" / "login" =>
+    case req @ POST -> Root / "login" =>
       val res: F[Response[F]] = for {
         userCredential <- req.as[UserCredential]
         user <- userService
@@ -93,8 +89,8 @@ class UserServiceEndpoint[F[_]: Sync, A](
       }
   }
 
-  val publicService: HttpRoutes[F] = loginService <+> userCreateService
-  val privateService: AuthService  = uService
+  val publicService: HttpRoutes[F]   = loginService <+> userCreateService
+  val privateService: AuthService[F] = uService
 
 }
 

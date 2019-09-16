@@ -40,7 +40,6 @@ create table board(
     name varchar,
     description text,
     closed boolean,
-    organization_id bigint references organization(organization_id),
     pinned boolean,
     board_url varchar,
     starred boolean,

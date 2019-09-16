@@ -4,9 +4,8 @@ import java.time.Instant
 case class Board(
   boardId: Long,
   name: String,
-  description: String,
+  description: Option[String],
   closed: Boolean,
-  organizationId: Long,
   pinned: Boolean,
   boardUrl: String,
   starred: Boolean,
@@ -16,12 +15,9 @@ case class Board(
 
 case class BoardRequest(
   name: String,
-  description: String,
+  description: Option[String],
   closed: Boolean,
-  organizationId: Long,
   pinned: Boolean,
   boardUrl: String,
-  starred: Boolean,
-  createdDate: Instant,
-  modifiedDate: Instant
+  starred: Boolean
 )

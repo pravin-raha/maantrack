@@ -18,8 +18,6 @@ import io.scalaland.chimney.dsl._
 private object UserSql {
   import Fragments.whereAnd
 
-  private val now = Instant.now()
-
   private val tableName: Fragment = Fragment.const("app_user")
 
   def insert(userRequest: UserRequest): Update0 =
@@ -30,7 +28,7 @@ private object UserSql {
           (
              ${userRequest.email}, ${userRequest.firsName}, ${userRequest.lastName}, ${userRequest.userType}
            , ${userRequest.password}, ${userRequest.birthDate}
-           , ${userRequest.userName}, $now, $now
+           , ${userRequest.userName}, NOW(), NOW()
           )""")
       .updateWithLogHandler(LogHandler.jdkLogHandler)
 

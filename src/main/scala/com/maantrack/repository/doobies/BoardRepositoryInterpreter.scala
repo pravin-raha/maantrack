@@ -1,8 +1,10 @@
 package com.maantrack.repository.doobies
 
+import cats.implicits._
 import cats.data.OptionT
 import cats.effect.Async
 import com.maantrack.domain.board.{ Board, BoardRepository, BoardRequest }
+import com.maantrack.domain.user.board.AppUserBoard
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
@@ -19,19 +21,19 @@ object BoardSQL {
   private def select: Fragment =
     fr"""
         select
-             board_id, name, description, closed, organization_id, pinned, board_url, starred ,created_date, modified_date
+             board_id, name, description, closed, pinned, board_url, starred ,created_date, modified_date
         from board
       """
 
   def insert(board: BoardRequest): Update0 =
     sql"""
          insert into board
-               (name, description, closed, organization_id, pinned, board_url,
+               (name, description, closed, pinned, board_url,
                starred , created_date, modified_date)
          values
-              ( ${board.name}, ${board.description}, ${board.closed}, ${board.organizationId}
-              , ${board.pinned}, ${board.boardUrl}, ${board.starred}, ${board.createdDate}, ${board.modifiedDate})
-       """.update
+              ( ${board.name}, ${board.description}, ${board.closed}
+              , ${board.pinned}, ${board.boardUrl}, ${board.starred}, NOW(), NOW())
+       """.updateWithLogHandler(LogHandler.jdkLogHandler)
 
   def update(board: Board): Update0 =
     sql"""
@@ -50,14 +52,18 @@ object BoardSQL {
 class BoardRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends BoardRepository[F] {
   import BoardSQL._
 
-  override def add(boardRequest: BoardRequest): F[Long] =
-    insert(boardRequest)
-      .withUniqueGeneratedKeys[Long]("board_id")
-      .transact(xa)
+  override def add(userId: Long, boardRequest: BoardRequest): F[Long] =
+    (for {
+      id <- insert(boardRequest)
+             .withUniqueGeneratedKeys[Long]("board_id")
+      _ <- AppUserBoardSQL.insert(AppUserBoard(userId, id)).run
+    } yield id).transact(xa)
 
   override def getById(id: Long): OptionT[F, Board] = OptionT(byId(id).option.transact(xa))
 
-  override def deleteById(id: Long): F[Int] = delete(id).run.transact(xa)
+  override def deleteById(id: Long): OptionT[F, Board] =
+    getById(id)
+      .semiflatMap(board => delete(id).run.transact(xa).as(board))
 
   override def update(board: Board): F[Int] = BoardSQL.update(board).run.transact(xa)
 }

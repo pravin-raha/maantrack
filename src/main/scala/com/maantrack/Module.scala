@@ -3,10 +3,15 @@ package com.maantrack
 import cats.effect.{ Async, Blocker, ConcurrentEffect, ContextShift }
 import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
+import com.maantrack.domain.board.BoardService
 import com.maantrack.domain.token.TokenService
 import com.maantrack.domain.user.{ User, UserService }
-import com.maantrack.endpoint.{ UserServiceEndpoint, SwaggerUIServiceEndpoint }
-import com.maantrack.repository.doobies.{ TokenRepositoryInterpreter, UserRepositoryInterpreter }
+import com.maantrack.endpoint.{ BoardServiceEndpoint, SwaggerUIServiceEndpoint, UserServiceEndpoint }
+import com.maantrack.repository.doobies.{
+  BoardRepositoryInterpreter,
+  TokenRepositoryInterpreter,
+  UserRepositoryInterpreter
+}
 import doobie.hikari.HikariTransactor
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
@@ -66,9 +71,13 @@ class Module[F[_]: Async, A](
       hasher
     )
 
-  private val swaggerEndpoint: SwaggerUIServiceEndpoint[F] = SwaggerUIServiceEndpoint(blocker)
+  val swaggerEndpoint: SwaggerUIServiceEndpoint[F] = SwaggerUIServiceEndpoint(blocker)
 
-  val httpEndpoint: HttpRoutes[F] = swaggerEndpoint.service <+> helloEndpoint.publicService <+> Auth
+  private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa)
+  private val boardService: BoardService[F]                  = new BoardService[F](boardRepository)
+  val boardServiceEndpoint: HttpRoutes[F]                    = Auth.liftService(new BoardServiceEndpoint[F](boardService).privateService)
+
+  val userEndpoint: HttpRoutes[F] = helloEndpoint.publicService <+> Auth
     .liftService(helloEndpoint.privateService)
 
 }
