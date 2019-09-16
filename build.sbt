@@ -95,8 +95,8 @@ resolvers += Resolver.sonatypeRepo("releases")
 resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases"
 
 sonarUseExternalConfig := true
-coverageEnabled := true
-coverageHighlighting := true
+coverageEnabled := false
+coverageHighlighting := false
 
 addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
