@@ -188,6 +188,74 @@ paths:
             $ref: "#/definitions/Board"
         404:
           description: "Board not found"
+  /list:
+    post:
+      security:
+        - api_key: []
+      tags:
+        - "list"
+      summary: "Create list"
+      description: "This can only be done by the logged in user."
+      operationId: "createList"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Created list object"
+          required: true
+          schema:
+            $ref: "#/definitions/ListRequest"
+      responses:
+        default:
+          description: "successful operation"
+  /list/{listId}:
+    get:
+      tags:
+        - "list"
+      summary: "Get Board by list id"
+      description: ""
+      operationId: "getListById"
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "listId"
+          in: "path"
+          description: "The list id that needs to be fetched. Use 1 for testing. "
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/List"
+        404:
+          description: "List not found"
+    delete:
+      security:
+        - api_key: []
+      tags:
+        - "list"
+      summary: "Delete list"
+      description: "This can only be done by the logged in user."
+      operationId: "deleteList"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "listId"
+          in: "path"
+          description: "The list id that needs to be deleted"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/List"
+        404:
+          description: "List not found"
 
 securityDefinitions:
   api_key:
@@ -241,14 +309,6 @@ definitions:
       birthDate:
         type: "string"
         format: "date-time"
-      boardIds:
-        type: "array"
-        items:
-          type: "integer"
-      organizationIds:
-        type: "array"
-        items:
-          type: "integer"
       createdDate:
         type: "string"
         format: "date-time"
@@ -380,6 +440,23 @@ definitions:
       modifiedDate:
         type: "string"
         format: "date-time"
+    xml:
+      name: "List"
+  ListRequest:
+    type: "object"
+    properties:
+      listId:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+      closed:
+        type: "boolean"
+      boardId:
+        type: "integer"
+      pos:
+        type: "integer"
+        format: "int64"
     xml:
       name: "List"
   Card:

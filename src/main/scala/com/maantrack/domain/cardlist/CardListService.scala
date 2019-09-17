@@ -10,5 +10,5 @@ class CardListService[F[_]: Async](cardListRepository: CardListRepository[F]) {
 
   def update(list: CardList): F[Int] = cardListRepository.update(list)
 
-  def deleteById(id: Long): F[Int] = cardListRepository.deleteById(id)
+  def deleteById(id: Long): OptionT[F, CardList] = cardListRepository.deleteById(id)
 }

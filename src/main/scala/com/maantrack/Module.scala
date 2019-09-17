@@ -4,11 +4,18 @@ import cats.effect.{ Async, Blocker, ConcurrentEffect, ContextShift }
 import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
 import com.maantrack.domain.board.BoardService
+import com.maantrack.domain.cardlist.CardListService
 import com.maantrack.domain.token.TokenService
 import com.maantrack.domain.user.{ User, UserService }
-import com.maantrack.endpoint.{ BoardServiceEndpoint, SwaggerUIServiceEndpoint, UserServiceEndpoint }
+import com.maantrack.endpoint.{
+  BoardServiceEndpoint,
+  CardListServiceEndpoint,
+  SwaggerUIServiceEndpoint,
+  UserServiceEndpoint
+}
 import com.maantrack.repository.doobies.{
   BoardRepositoryInterpreter,
+  CardListRepositoryInterpreter,
   TokenRepositoryInterpreter,
   UserRepositoryInterpreter
 }
@@ -76,6 +83,10 @@ class Module[F[_]: Async, A](
   private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa)
   private val boardService: BoardService[F]                  = new BoardService[F](boardRepository)
   val boardServiceEndpoint: HttpRoutes[F]                    = Auth.liftService(new BoardServiceEndpoint[F](boardService).privateService)
+
+  private lazy val listRepository: CardListRepositoryInterpreter[F] = new CardListRepositoryInterpreter[F](xa)
+  private lazy val listService: CardListService[F]                  = new CardListService[F](listRepository)
+  val listEndpoint: HttpRoutes[F]                                   = new CardListServiceEndpoint[F](listService, Auth).service
 
   val userEndpoint: HttpRoutes[F] = helloEndpoint.publicService <+> Auth
     .liftService(helloEndpoint.privateService)

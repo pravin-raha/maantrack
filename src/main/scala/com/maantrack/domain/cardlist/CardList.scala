@@ -15,7 +15,5 @@ case class CardListRequest(
   name: String,
   closed: Boolean,
   boardId: Long,
-  pos: Int,
-  createdDate: Instant,
-  modifiedDate: Instant
+  pos: Int
 )

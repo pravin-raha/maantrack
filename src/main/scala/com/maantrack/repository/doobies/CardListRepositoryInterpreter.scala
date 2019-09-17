@@ -1,5 +1,6 @@
 package com.maantrack.repository.doobies
 
+import cats.implicits._
 import cats.data.OptionT
 import cats.effect.Async
 import com.maantrack.domain.cardlist.{ CardList, CardListRepository, CardListRequest }
@@ -12,6 +13,8 @@ import doobie.{ Fragments, Query0, Update0 }
 object CardListSQL {
   import Fragments.whereAnd
 
+  private val tableName: Fragment = Fragment.const("list")
+
   def byId(id: Long): Query0[CardList] =
     (select ++ whereAnd(fr"list_id = $id"))
       .queryWithLogHandler[CardList](LogHandler.jdkLogHandler)
@@ -20,16 +23,13 @@ object CardListSQL {
     fr"""
         select
              list_id, name, closed, board_id, pos, created_date, modified_date
-        from list
-      """
+        from
+      """ ++ tableName
 
   def insert(listReq: CardListRequest): Update0 =
-    sql"""
-         insert into list
-               (name, closed, pos, created_date, modified_date)
-         values
-              (${listReq.name}, ${listReq.closed}, ${listReq.pos}, ${listReq.createdDate}, ${listReq.modifiedDate})
-       """.update
+    (fr"insert into" ++ tableName ++
+      fr"(name, closed, board_id, pos, created_date, modified_date)" ++
+      fr"values (${listReq.name}, ${listReq.closed}, ${listReq.boardId}, ${listReq.pos}, now(), now())").update
 
   def update(list: CardList): Update0 =
     sql"""
@@ -39,10 +39,7 @@ object CardListSQL {
        """.update
 
   def delete(id: Long): Update0 =
-    sql"""
-         delete from list
-         where list_id = $id
-       """.update
+    (fr"delete from" ++ tableName ++ fr"where list_id = $id").update
 }
 
 class CardListRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends CardListRepository[F] {
@@ -55,7 +52,9 @@ class CardListRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extend
 
   override def getById(id: Long): OptionT[F, CardList] = OptionT(byId(id).option.transact(xa))
 
-  override def deleteById(id: Long): F[Int] = delete(id).run.transact(xa)
+  override def deleteById(id: Long): OptionT[F, CardList] =
+    getById(id)
+      .semiflatMap(list => delete(id).run.transact(xa).as(list))
 
   override def update(cardList: CardList): F[Int] = CardListSQL.update(cardList).run.transact(xa)
 }

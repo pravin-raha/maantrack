@@ -52,9 +52,10 @@ object HttpServer {
 
   def httpApp[F[_]: Async, A](ctx: Module[F, A]): HttpApp[F] = {
     Router(
+      "/"      -> ctx.swaggerEndpoint.service,
       "/user"  -> ctx.userEndpoint,
       "/board" -> ctx.boardServiceEndpoint,
-      "/"      -> ctx.swaggerEndpoint.service
+      "/list"  -> ctx.listEndpoint
     ).orNotFound
   }
 
