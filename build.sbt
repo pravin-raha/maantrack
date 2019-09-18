@@ -4,7 +4,7 @@ version := "0.1"
 
 scalaVersion := "2.13.0"
 
-lazy val doobieVersion        = "0.8.0-RC1"
+lazy val doobieVersion        = "0.8.2"
 lazy val http4sVersion        = "0.21.0-M4"
 lazy val flywayDbVersion      = "5.2.4"
 lazy val tsecVersion          = "0.2.0-M1"
