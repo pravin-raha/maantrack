@@ -1,7 +1,6 @@
+organization := "io.github.pravin-raha"
 name := "maantrack"
-
 version := "0.1"
-
 scalaVersion := "2.13.0"
 
 lazy val doobieVersion             = "0.8.2"
