@@ -1,7 +1,7 @@
 package com.maantrack.endpoint
 
 import cats.implicits._
-import cats.effect.{ ConcurrentEffect, Sync }
+import cats.effect.Sync
 import com.maantrack.domain.cardlist.{ CardListRequest, CardListService }
 import com.maantrack.domain.user.User
 import org.http4s.dsl.Http4sDsl
@@ -14,8 +14,7 @@ import org.http4s.circe._
 class CardListServiceEndpoint[F[_]: Sync](
   cardListService: CardListService[F],
   Auth: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]]
-)(implicit F: ConcurrentEffect[F])
-    extends Http4sDsl[F] {
+) extends Http4sDsl[F] {
 
   private val authService: AuthService[F] = TSecAuthService {
     case req @ POST -> Root asAuthed _ =>

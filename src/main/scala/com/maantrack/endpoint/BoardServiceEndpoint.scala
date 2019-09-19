@@ -13,8 +13,7 @@ import tsec.authentication._
 
 class BoardServiceEndpoint[F[_]: Sync](
   boardService: BoardService[F]
-)(implicit F: ConcurrentEffect[F])
-    extends Http4sDsl[F] {
+) extends Http4sDsl[F] {
 
   private val boardCreateService: AuthService[F] = TSecAuthService {
     case req @ POST -> Root asAuthed user =>

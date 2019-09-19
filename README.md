@@ -9,11 +9,11 @@ sbt run
 ```
 
 Paste this url to see swagger docs
-```
-http://localhost:8080/swagger-ui/index.html
-```
+
+[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html
+)
+
 
 Heroku url
-```
-https://maantrack.herokuapp.com/swagger-ui/index.html
-```
+
+[https://maantrack.herokuapp.com/swagger-ui/index.html](https://maantrack.herokuapp.com/swagger-ui/index.html)

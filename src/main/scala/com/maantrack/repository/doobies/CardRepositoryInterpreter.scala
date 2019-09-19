@@ -1,5 +1,6 @@
 package com.maantrack.repository.doobies
 
+import cats.implicits._
 import cats.data.OptionT
 import cats.effect.Async
 import com.maantrack.domain.card.{ Card, CardRepository, CardRequest }
@@ -28,8 +29,8 @@ object CardSQL {
          insert into card
                (closed, description , due, due_completed, board_id, list_id , name, pos , created_date, modified_date)
          values
-              (${cardReq.closed}, ${cardReq.description}, ${cardReq.due}, ${cardReq.dueCompleted}, ${cardReq.boardId}
-               ${cardReq.listId}, ${cardReq.name}, ${cardReq.pos}, ${cardReq.createdDate}, ${cardReq.modifiedDate})
+              (${cardReq.closed}, ${cardReq.description}, ${cardReq.due}, ${cardReq.dueCompleted}, ${cardReq.boardId},
+               ${cardReq.listId}, ${cardReq.name}, ${cardReq.pos}, now(), now())
        """.update
 
   def update(card: Card): Update0 =
@@ -56,7 +57,9 @@ class CardRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends Ca
 
   override def getById(id: Long): OptionT[F, Card] = OptionT(byId(id).option.transact(xa))
 
-  override def deleteById(id: Long): F[Int] = delete(id).run.transact(xa)
+  override def deleteById(id: Long): OptionT[F, Card] =
+    getById(id)
+      .semiflatMap(card => delete(id).run.transact(xa).as(card))
 
   override def update(card: Card): F[Int] = CardSQL.update(card).run.transact(xa)
 }

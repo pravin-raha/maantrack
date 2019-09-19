@@ -19,8 +19,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
   bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
   userService: UserService[F],
   hasher: PasswordHasher[F, A]
-)(implicit F: ConcurrentEffect[F])
-    extends Http4sDsl[F] {
+) extends Http4sDsl[F] {
 
   private val userCreateService = HttpRoutes.of[F] {
     case req @ POST -> Root =>

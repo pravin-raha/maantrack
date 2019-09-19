@@ -213,7 +213,7 @@ paths:
     get:
       tags:
         - "list"
-      summary: "Get Board by list id"
+      summary: "Get List by list id"
       description: ""
       operationId: "getListById"
       security:
@@ -256,6 +256,74 @@ paths:
             $ref: "#/definitions/List"
         404:
           description: "List not found"
+  /card:
+    post:
+      security:
+        - api_key: []
+      tags:
+        - "card"
+      summary: "Create card"
+      description: "This can only be done by the logged in user."
+      operationId: "createCard"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Created card object"
+          required: true
+          schema:
+            $ref: "#/definitions/CardRequest"
+      responses:
+        default:
+          description: "successful operation"
+  /card/{cardId}:
+    get:
+      tags:
+        - "card"
+      summary: "Get Card by card id"
+      description: ""
+      operationId: "getCardById"
+      security:
+        - api_key: []
+      produces:
+        - "application/json"
+      parameters:
+        - name: "cardId"
+          in: "path"
+          description: "The card id that needs to be fetched. Use 1 for testing. "
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Card"
+        404:
+          description: "Card not found"
+    delete:
+      security:
+        - api_key: []
+      tags:
+        - "card"
+      summary: "Delete card"
+      description: "This can only be done by the logged in user."
+      operationId: "deleteCard"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "cardId"
+          in: "path"
+          description: "The card id that needs to be deleted"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Card"
+        404:
+          description: "Card not found"
 
 securityDefinitions:
   api_key:
@@ -445,9 +513,6 @@ definitions:
   ListRequest:
     type: "object"
     properties:
-      listId:
-        type: "integer"
-        format: "int64"
       name:
         type: "string"
       closed:
@@ -490,3 +555,25 @@ definitions:
         format: "date-time"
     xml:
       name: "Card"
+  CardRequest:
+    type: "object"
+    properties:
+      description:
+        type: "string"
+      closed:
+        type: "boolean"
+      due:
+        type: "string"
+        format: "date-time"
+      dueCompleted:
+        type: "boolean"
+      boardId:
+        type: "integer"
+      listId:
+        type: "integer"
+      name:
+        type: "string"
+      pos:
+        type: "integer"
+    xml:
+      name: "CardRequest"

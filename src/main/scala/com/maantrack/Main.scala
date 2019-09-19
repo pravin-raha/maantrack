@@ -55,7 +55,8 @@ object HttpServer {
       "/"      -> ctx.swaggerEndpoint.service,
       "/user"  -> ctx.userEndpoint,
       "/board" -> ctx.boardServiceEndpoint,
-      "/list"  -> ctx.listEndpoint
+      "/list"  -> ctx.listEndpoint,
+      "/card"  -> ctx.cardEndpoint
     ).orNotFound
   }
 
