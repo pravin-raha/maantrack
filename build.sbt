@@ -4,20 +4,22 @@ version := "0.1"
 
 scalaVersion := "2.13.0"
 
-lazy val doobieVersion        = "0.8.2"
-lazy val http4sVersion        = "0.21.0-M4"
-lazy val flywayDbVersion      = "5.2.4"
-lazy val tsecVersion          = "0.2.0-M1"
-lazy val circeVersion         = "0.12.1"
-lazy val circeConfigVersion   = "0.7.0-M1"
-lazy val refinedVersion       = "0.9.9"
-lazy val catsVersion          = "2.0.0"
-lazy val pureConfigVersion    = "0.11.1"
-lazy val log4catsSlf4jVersion = "1.0.0"
-lazy val chimneyVersion       = "0.3.2"
-lazy val scalaCheckVersion    = "1.14.0"
-lazy val scalaTestVersion     = "3.1.0-M2"
-lazy val scalacticVersion     = "3.0.8"
+lazy val doobieVersion             = "0.8.2"
+lazy val http4sVersion             = "0.21.0-M4"
+lazy val flywayVersion             = "5.2.4"
+lazy val tsecVersion               = "0.2.0-M1"
+lazy val circeVersion              = "0.12.1"
+lazy val circeGenericExtrasVersion = "0.12.1"
+lazy val circeConfigVersion        = "0.7.0-M1"
+lazy val refinedVersion            = "0.9.9"
+lazy val catsVersion               = "2.0.0"
+lazy val catsEffectVersion         = "2.0.0"
+lazy val pureconfigVersion         = "0.11.1"
+lazy val log4catsSlf4jVersion      = "1.0.0"
+lazy val chimneyVersion            = "0.3.2"
+lazy val scalaCheckVersion         = "1.14.0"
+lazy val scalaTestVersion          = "3.1.0-M2"
+lazy val scalacticVersion          = "3.0.8"
 
 libraryDependencies ++= http4s
 libraryDependencies ++= tsec
@@ -35,7 +37,7 @@ lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-hikari"    % doobieVersion,
   "org.tpolecat" %% "doobie-postgres"  % doobieVersion,
   "org.tpolecat" %% "doobie-h2"        % doobieVersion,
-  "org.flywaydb" % "flyway-core"       % flywayDbVersion
+  "org.flywaydb" % "flyway-core"       % flywayVersion
 )
 
 lazy val http4s = Seq(
@@ -44,7 +46,7 @@ lazy val http4s = Seq(
   "org.http4s" %% "http4s-circe"         % http4sVersion,
   "io.circe"   %% "circe-generic"        % circeVersion,
   "io.circe"   %% "circe-literal"        % circeVersion,
-  "io.circe"   %% "circe-generic-extras" % circeVersion,
+  "io.circe"   %% "circe-generic-extras" % circeGenericExtrasVersion,
   "io.circe"   %% "circe-parser"         % circeVersion,
   "io.circe"   %% "circe-core"           % circeVersion,
   "io.circe"   %% "circe-config"         % circeConfigVersion
@@ -53,8 +55,8 @@ lazy val http4s = Seq(
 lazy val common = Seq(
   "mysql"                 % "mysql-connector-java" % "5.1.24",
   "org.typelevel"         %% "cats-core"           % catsVersion,
-  "org.typelevel"         %% "cats-effect"         % catsVersion,
-  "com.github.pureconfig" %% "pureconfig"          % pureConfigVersion,
+  "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
+  "com.github.pureconfig" %% "pureconfig"          % pureconfigVersion,
   "io.chrisdavenport"     %% "log4cats-slf4j"      % log4catsSlf4jVersion,
   "ch.qos.logback"        % "logback-classic"      % "1.2.3",
   "io.scalaland"          %% "chimney"             % chimneyVersion
