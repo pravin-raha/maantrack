@@ -1,7 +1,34 @@
-organization := "io.github.pravin-raha"
-name := "maantrack"
-version := "0.1"
-scalaVersion := "2.13.0"
+lazy val commonSettings =
+  Seq(
+    organization := "io.github.pravin-raha",
+    name := "maantrack",
+    version := "0.1",
+    scalaVersion := "2.13.0",
+    dockerExposedPorts ++= Seq(8080),
+    resolvers += Resolver.sonatypeRepo("releases"),
+    resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases",
+    sonarUseExternalConfig := true,
+    coverageEnabled := false,
+    coverageHighlighting := false
+  )
+
+lazy val maantrack = project
+  .in(file("."))
+  .enablePlugins(JavaAppPackaging)
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= http4s,
+    libraryDependencies ++= tsec,
+    libraryDependencies ++= doobie,
+    libraryDependencies ++= common,
+    libraryDependencies ++= refined,
+    libraryDependencies ++= webjar,
+    libraryDependencies ++= testDependencies
+  )
+  .settings(
+    addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt"),
+    addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
+  )
 
 lazy val doobieVersion             = "0.8.2"
 lazy val http4sVersion             = "0.21.0-M4"
@@ -19,16 +46,6 @@ lazy val chimneyVersion            = "0.3.2"
 lazy val scalaCheckVersion         = "1.14.0"
 lazy val scalaTestVersion          = "3.1.0-M2"
 lazy val scalacticVersion          = "3.0.8"
-
-libraryDependencies ++= http4s
-libraryDependencies ++= tsec
-libraryDependencies ++= doobie
-libraryDependencies ++= common
-libraryDependencies ++= refined
-libraryDependencies ++= webjar
-libraryDependencies ++= testDependencies
-
-enablePlugins(JavaAppPackaging)
 
 lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-core"      % doobieVersion,
@@ -89,15 +106,3 @@ lazy val testDependencies = Seq(
   "org.scalatest"  %% "scalatest"  % scalaTestVersion  % "test",
   "org.scalactic"  %% "scalactic"  % scalacticVersion  % "test"
 )
-
-dockerExposedPorts ++= Seq(8080)
-
-resolvers += Resolver.sonatypeRepo("releases")
-resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases"
-
-sonarUseExternalConfig := true
-coverageEnabled := false
-coverageHighlighting := false
-
-addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
-addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
