@@ -69,7 +69,7 @@ lazy val http4s = Seq(
 )
 
 lazy val common = Seq(
-  "mysql"                 % "mysql-connector-java" % "5.1.24",
+  "mysql"                 % "mysql-connector-java" % "5.1.48",
   "org.typelevel"         %% "cats-core"           % catsVersion,
   "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
   "com.github.pureconfig" %% "pureconfig"          % pureconfigVersion,
