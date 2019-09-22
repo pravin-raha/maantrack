@@ -11,7 +11,7 @@ import org.http4s.HttpApp
 import org.http4s.server.blaze._
 import org.http4s.server.{ Router, Server => H4Server }
 import org.http4s.syntax.all._
-import pureconfig.loadConfigOrThrow
+import pureconfig.ConfigSource
 import tsec.passwordhashers.jca.BCrypt
 import pureconfig.generic.auto._
 
@@ -30,11 +30,11 @@ object HttpServer {
     for {
       serverConfig <- Resource.liftF(
                        Monad[F].pure(
-                         loadConfigOrThrow[ServerConfig](namespace = "server")
+                         ConfigSource.default.at("server").loadOrThrow[ServerConfig]
                        )
                      )
       dataBaseConfig <- Resource.liftF(
-                         Monad[F].pure(loadConfigOrThrow[DatabaseConfig]("database"))
+                         Monad[F].pure(ConfigSource.default.at("database").loadOrThrow[DatabaseConfig])
                        )
       connEc <- ExecutionContexts.fixedThreadPool[F](
                  dataBaseConfig.poolSize
