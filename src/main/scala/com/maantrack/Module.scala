@@ -1,6 +1,6 @@
 package com.maantrack
 
-import cats.effect.{ Async, Blocker, ConcurrentEffect, ContextShift }
+import cats.effect.{ Blocker, ConcurrentEffect, ContextShift, Sync }
 import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
 import com.maantrack.domain.board.BoardService
@@ -23,15 +23,14 @@ import com.maantrack.repository.doobies.{
   UserRepositoryInterpreter
 }
 import doobie.hikari.HikariTransactor
-import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import io.chrisdavenport.log4cats.Logger
 import org.http4s.HttpRoutes
 import tsec.authentication.{ BearerTokenAuthenticator, SecuredRequestHandler, TSecBearerToken, TSecTokenSettings }
 import tsec.passwordhashers.PasswordHasher
 
 import scala.concurrent.duration._
 
-class Module[F[_]: Async, A](
+class Module[F[_]: Sync: Logger, A](
   xa: HikariTransactor[F],
   hasher: PasswordHasher[F, A],
   blocker: Blocker
@@ -39,9 +38,6 @@ class Module[F[_]: Async, A](
   implicit F: ConcurrentEffect[F],
   cs: ContextShift[F]
 ) {
-
-  implicit def unsafeLogger: SelfAwareStructuredLogger[F] =
-    Slf4jLogger.getLogger[F]
 
   private lazy val userRepoInterpreter: UserRepositoryInterpreter[F] =
     UserRepositoryInterpreter(xa = xa)

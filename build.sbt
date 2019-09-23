@@ -23,7 +23,8 @@ lazy val maantrack = project
     libraryDependencies ++= common,
     libraryDependencies ++= refined,
     libraryDependencies ++= webjar,
-    libraryDependencies ++= testDependencies
+    libraryDependencies ++= testDependencies,
+    libraryDependencies ++= dbTestingStack
   )
   .settings(
     addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt"),
@@ -106,3 +107,5 @@ lazy val testDependencies = Seq(
   "org.scalatest"  %% "scalatest"  % scalaTestVersion  % "test",
   "org.scalactic"  %% "scalactic"  % scalacticVersion  % "test"
 )
+
+lazy val dbTestingStack = Seq("com.opentable.components" % "otj-pg-embedded" % "0.13.1")

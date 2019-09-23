@@ -1,22 +1,23 @@
 package com.maantrack.repository.doobies
 
-import cats.implicits._
 import cats.data.OptionT
-import cats.effect.Async
+import cats.effect.Sync
+import cats.implicits._
 import com.maantrack.domain.board.{ Board, BoardRepository, BoardRequest }
 import com.maantrack.domain.user.board.AppUserBoard
+import com.maantrack.repository.doobies.Doobie._
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import doobie.util.log.LogHandler
 import doobie.{ Fragments, Query0, Update0 }
+import io.chrisdavenport.log4cats.Logger
 
 object BoardSQL {
   import Fragments.whereAnd
 
   def byId(id: Long): Query0[Board] =
     (select ++ whereAnd(fr"board_id = $id"))
-      .queryWithLogHandler[Board](LogHandler.jdkLogHandler)
+      .query[Board]
 
   private def select: Fragment =
     fr"""
@@ -33,7 +34,7 @@ object BoardSQL {
          values
               ( ${board.name}, ${board.description}, ${board.closed}
               , ${board.pinned}, ${board.boardUrl}, ${board.starred}, NOW(), NOW())
-       """.updateWithLogHandler(LogHandler.jdkLogHandler)
+       """.update
 
   def update(board: Board): Update0 =
     sql"""
@@ -49,7 +50,7 @@ object BoardSQL {
        """.update
 }
 
-class BoardRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends BoardRepository[F] {
+class BoardRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends BoardRepository[F] {
   import BoardSQL._
 
   override def add(userId: Long, boardRequest: BoardRequest): F[Long] =

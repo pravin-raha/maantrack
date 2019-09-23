@@ -4,7 +4,7 @@ import cats.effect._
 import cats.implicits._
 import com.maantrack.domain.Error
 import com.maantrack.domain.user._
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import io.chrisdavenport.log4cats.Logger
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.scalaland.chimney.dsl._
@@ -15,7 +15,7 @@ import tsec.authentication.{ TSecAuthService, _ }
 import tsec.common.Verified
 import tsec.passwordhashers.{ PasswordHash, PasswordHasher }
 
-class UserServiceEndpoint[F[_]: Sync, A](
+class UserServiceEndpoint[F[_]: Sync: Logger, A](
   bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
   userService: UserService[F],
   hasher: PasswordHasher[F, A]
@@ -23,7 +23,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
 
   private val userCreateService = HttpRoutes.of[F] {
     case req @ POST -> Root =>
-      val res: F[Response[F]] = for {
+      for {
         userRequest <- req.as[UserRequest]
         hash        <- hasher.hashpw(userRequest.password.getBytes)
         userRes <- userService
@@ -31,15 +31,6 @@ class UserServiceEndpoint[F[_]: Sync, A](
                     .map(_.into[UserResponse].transform)
         result <- Ok(userRes.asJson)
       } yield result
-
-      res.recoverWith {
-        case e =>
-          for {
-            logger <- Slf4jLogger.create[F]
-            _      <- logger.error(e)(e.getMessage)
-            b      <- BadRequest()
-          } yield b
-      }
   }
 
   private val uService: AuthService[F] = TSecAuthService {
@@ -68,7 +59,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
         userCredential <- req.as[UserCredential]
         user <- userService
                  .getUserByUserName(userCredential.userName)
-                 .toRight(Error.NotFound(): Throwable)
+                 .toRight(Error.NotFound("Bad Credential"): Throwable)
                  .value
                  .flatMap(_.liftTo[F])
         hash   = PasswordHash[A](user.password)
@@ -79,12 +70,8 @@ class UserServiceEndpoint[F[_]: Sync, A](
       } yield bearerTokenAuth.embed(resp, tok)
 
       res.recoverWith {
-        case e =>
-          for {
-            logger <- Slf4jLogger.create[F]
-            _      <- logger.error(e)(e.getMessage)
-            b      <- BadRequest()
-          } yield b
+        case n: Error.NotFound => NotFound(n.msg)
+        case e                 => Logger[F].error(e)(e.getMessage) *> BadRequest()
       }
   }
 
@@ -94,7 +81,7 @@ class UserServiceEndpoint[F[_]: Sync, A](
 }
 
 object UserServiceEndpoint {
-  def apply[F[_]: Async, A](
+  def apply[F[_]: Sync: Logger, A](
     bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
     userService: UserService[F],
     hasher: PasswordHasher[F, A]

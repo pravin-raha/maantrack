@@ -3,28 +3,27 @@ package com.maantrack.repository.doobies
 import java.time.Instant
 
 import cats.data.OptionT
-import cats.implicits._
-import cats.effect.Async
+import cats.effect.Sync
 import com.maantrack.domain.organization.{ Organization, OrganizationRepository, OrganizationRequest }
 import com.maantrack.domain.user.User
+import com.maantrack.repository.doobies.Doobie._
+import doobie.free.connection.ConnectionIO
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import doobie.util.log.LogHandler
 import doobie.{ Fragments, Update0 }
+import io.chrisdavenport.log4cats.Logger
 
 object OrganizationSQL {
 
   import Fragments.whereAnd
 
-  def byId[F[_]: Async](id: Long)(xa: HikariTransactor[F]): F[Option[Organization]] =
-    select(select ++ whereAnd(fr"organization_id = $id"))(xa)
+  def byId(id: Long): doobie.ConnectionIO[Option[Organization]] =
+    select(select ++ whereAnd(fr"organization_id = $id"))
       .map(_.headOption)
 
-  def select[F[_]: Async](f: Fragment)(xa: HikariTransactor[F]): F[List[Organization]] =
-    f.queryWithLogHandler[(Long, String, String, String, String, String, Instant, Instant, Long, User)](
-        LogHandler.jdkLogHandler
-      )
+  def select(f: Fragment): ConnectionIO[List[Organization]] =
+    f.query[(Long, String, String, String, String, String, Instant, Instant, Long, User)]
       .stream
       .compile
       .toList
@@ -33,7 +32,6 @@ object OrganizationSQL {
           case (k, v) => Organization(k._1, k._2, k._3, v.map(_._1), k._4, k._5, k._6, v.map(_._2), k._7, k._8)
         }
       )
-      .transact(xa)
 
   private val select: Fragment =
     fr"""
@@ -49,7 +47,7 @@ object OrganizationSQL {
          values
               (${orgReq.description}, ${orgReq.displayName}, ${orgReq.name}, ${orgReq.organizationUrl} ,
                ${orgReq.website},${orgReq.createdDate},${orgReq.modifiedDate})
-       """.update
+       """.update(Doobie.doobieLogHandler)
 
   def update(org: Organization): Update0 =
     sql"""
@@ -65,7 +63,7 @@ object OrganizationSQL {
        """.update
 }
 
-class OrganizationRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends OrganizationRepository[F] {
+class OrganizationRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends OrganizationRepository[F] {
   import OrganizationSQL._
 
   override def add(orgRequest: OrganizationRequest): F[Long] =
@@ -73,7 +71,7 @@ class OrganizationRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) ex
       .withUniqueGeneratedKeys[Long]("organization_id")
       .transact(xa)
 
-  override def getById(id: Long): OptionT[F, Organization] = OptionT(byId(id)(xa))
+  override def getById(id: Long): OptionT[F, Organization] = OptionT(byId(id).transact(xa))
 
   override def deleteById(id: Long): F[Int] = delete(id).run.transact(xa)
 

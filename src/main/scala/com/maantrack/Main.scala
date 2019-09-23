@@ -5,7 +5,7 @@ import cats.effect._
 import cats.implicits._
 import com.maantrack.config.{ DatabaseConfig, ServerConfig }
 import doobie.util.ExecutionContexts
-import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
+import io.chrisdavenport.log4cats.{ Logger, SelfAwareStructuredLogger }
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.HttpApp
 import org.http4s.server.blaze._
@@ -17,7 +17,7 @@ import pureconfig.generic.auto._
 
 object Main extends IOApp {
 
-  implicit def unsafeLogger: SelfAwareStructuredLogger[IO] =
+  implicit val unsafeLogger: SelfAwareStructuredLogger[IO] =
     Slf4jLogger.getLogger[IO]
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -26,7 +26,7 @@ object Main extends IOApp {
 
 object HttpServer {
 
-  def stream[F[_]: ConcurrentEffect: ContextShift: Timer, A]: Resource[F, H4Server[F]] =
+  def stream[F[_]: ConcurrentEffect: ContextShift: Timer: Logger, A]: Resource[F, H4Server[F]] =
     for {
       serverConfig <- Resource.liftF(
                        Monad[F].pure(
@@ -41,16 +41,15 @@ object HttpServer {
                )
       blocker <- Blocker[F]
       xa      <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
-
-      ctx = new Module(xa, BCrypt.syncPasswordHasher[F], blocker)
-      _   <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
+      ctx     = new Module(xa, BCrypt.syncPasswordHasher[F], blocker)
+      _       <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
       server <- BlazeServerBuilder[F]
                  .bindHttp(serverConfig.port, serverConfig.host)
                  .withHttpApp(httpApp(ctx))
                  .resource
     } yield server
 
-  def httpApp[F[_]: Async, A](ctx: Module[F, A]): HttpApp[F] = {
+  def httpApp[F[_]: Sync: Logger, A](ctx: Module[F, A]): HttpApp[F] = {
     Router(
       "/"      -> ctx.swaggerEndpoint.service,
       "/user"  -> ctx.userEndpoint,

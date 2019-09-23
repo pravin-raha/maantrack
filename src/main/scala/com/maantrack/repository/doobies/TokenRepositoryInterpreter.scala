@@ -1,16 +1,16 @@
 package com.maantrack.repository.doobies
 
-import cats.Monad
 import cats.data.OptionT
-import cats.effect.Async
+import cats.effect.Sync
 import cats.implicits._
 import com.maantrack.auth.BearerToken
 import com.maantrack.domain.token.TokenRepository
+import com.maantrack.repository.doobies.Doobie._
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import doobie.util.log.LogHandler
 import doobie.{ Query0, Update0, _ }
+import io.chrisdavenport.log4cats.Logger
 import tsec.common.SecureRandomId
 
 object BearerSQL {
@@ -18,17 +18,17 @@ object BearerSQL {
 
   def byUserId(userId: Long): doobie.Query0[BearerToken] =
     (select ++ whereAnd(fr"app_user_id = $userId"))
-      .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
+      .query[BearerToken]
 
   def byId(secureId: SecureRandomId): Query0[BearerToken] =
     (select ++ whereAnd(fr"secure_id = $secureId"))
-      .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
+      .query[BearerToken]
 
   def select: Fragment = fr"select secure_id, app_user_id, expiry, last_touched from token "
 
   def byUsername(userId: String): Query0[BearerToken] =
     (select ++ whereAnd(fr"app_user_id = $userId"))
-      .queryWithLogHandler[BearerToken](LogHandler.jdkLogHandler)
+      .query[BearerToken]
 
   def insert(u: BearerToken): Update0 = sql"""
     insert into token (secure_id, app_user_id, expiry, last_touched)
@@ -47,7 +47,7 @@ object BearerSQL {
   """.update
 }
 
-class TokenRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends TokenRepository[F] {
+class TokenRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends TokenRepository[F] {
 
   import BearerSQL._
 
@@ -69,7 +69,7 @@ class TokenRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends T
 }
 
 object TokenRepositoryInterpreter {
-  def apply[F[_]: Monad: Async](
+  def apply[F[_]: Sync: Logger](
     xa: HikariTransactor[F]
   ): TokenRepositoryInterpreter[F] =
     new TokenRepositoryInterpreter[F](xa)

@@ -1,17 +1,17 @@
 package com.maantrack.repository.doobies
 
 import cats.data.OptionT
-import cats.effect.Async
+import cats.effect.Sync
 import cats.implicits._
 import com.maantrack.domain.user.board.{ AppUserBoard, AppUserBoardRepository }
+import com.maantrack.repository.doobies.Doobie._
+import doobie.Fragments
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-
-import doobie.util.log.LogHandler
 import doobie.util.query.Query0
 import doobie.util.update.Update0
-import doobie.Fragments
+import io.chrisdavenport.log4cats.Logger
 
 object AppUserBoardSQL {
   import Fragments.whereAnd
@@ -22,7 +22,7 @@ object AppUserBoardSQL {
 
   def byId(id: Long): Query0[AppUserBoard] =
     (select ++ whereIdAnd(id))
-      .queryWithLogHandler[AppUserBoard](LogHandler.jdkLogHandler)
+      .query[AppUserBoard]
 
   private def select: Fragment = fr"select app_user_id, board_id from" ++ tableName
 
@@ -34,7 +34,7 @@ object AppUserBoardSQL {
   def delete(id: Long): Update0 = (fr"delete from" ++ tableName ++ whereIdAnd(id)).update
 }
 
-class AppUserBoardRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends AppUserBoardRepository[F] {
+class AppUserBoardRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends AppUserBoardRepository[F] {
   import AppUserBoardSQL._
 
   override def add(userBoard: AppUserBoard): F[Unit] =

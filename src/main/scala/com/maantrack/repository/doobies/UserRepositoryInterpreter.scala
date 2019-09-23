@@ -2,17 +2,17 @@ package com.maantrack.repository.doobies
 
 import java.time.Instant
 
-import cats._
 import cats.data.OptionT
-import cats.effect.Async
+import cats.effect.Sync
 import cats.implicits._
 import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
+import com.maantrack.repository.doobies.Doobie._
 import doobie.Fragments
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import doobie.util.log.LogHandler
 import doobie.util.update.Update0
+import io.chrisdavenport.log4cats.Logger
 import io.scalaland.chimney.dsl._
 
 private object UserSql {
@@ -20,7 +20,7 @@ private object UserSql {
 
   private val tableName: Fragment = Fragment.const("app_user")
 
-  def insert(userRequest: UserRequest): Update0 =
+  def insert[F[_]: Logger](userRequest: UserRequest): Update0 =
     (fr"""INSERT INTO""" ++ tableName ++
       fr"""( email, first_name, last_name, user_type, password, birth_date,
              user_name, created_date, modified_date )
@@ -29,23 +29,20 @@ private object UserSql {
              ${userRequest.email}, ${userRequest.firsName}, ${userRequest.lastName}, ${userRequest.userType}
            , ${userRequest.password}, ${userRequest.birthDate}
            , ${userRequest.userName}, NOW(), NOW()
-          )""")
-      .updateWithLogHandler(LogHandler.jdkLogHandler)
+          )""").update
 
-  def selectById(id: Long): doobie.Query0[User] =
-    (select ++ whereAnd(fr"app_user_id = $id")).queryWithLogHandler[User](LogHandler.jdkLogHandler)
+  def selectById[F[_]: Logger](id: Long): doobie.Query0[User] =
+    (select ++ whereAnd(fr"app_user_id = $id")).query[User]
 
-  def delete(id: Long): doobie.Update0 =
-    (fr"DELETE FROM" ++ tableName ++ fr"app_user WHERE app_user_id = $id")
-      .updateWithLogHandler(LogHandler.jdkLogHandler)
+  def delete[F[_]: Logger](id: Long): doobie.Update0 =
+    (fr"DELETE FROM" ++ tableName ++ fr"app_user WHERE app_user_id = $id").update
 
-  def update(user: User): doobie.Update0 =
-    (fr"UPDATE" ++ tableName ++ fr"set app_user_id = ${user.userId}, name = ${user.firsName}, email = ${user.email} WHERE app_user_id = ${user.userId}")
-      .updateWithLogHandler(LogHandler.jdkLogHandler)
+  def update[F[_]: Logger](user: User): doobie.Update0 =
+    (fr"UPDATE" ++ tableName ++ fr"set app_user_id = ${user.userId}, name = ${user.firsName}, email = ${user.email} WHERE app_user_id = ${user.userId}").update
 
-  def selectByUserName(username: String): doobie.Query0[User] =
+  def selectByUserName[F[_]: Logger](username: String): doobie.Query0[User] =
     (select ++ whereAnd(fr"user_name = $username"))
-      .queryWithLogHandler[User](LogHandler.jdkLogHandler)
+      .query[User]
 
   private val select =
     fr"""select app_user_id, avatar_url, avatar_source, bio, confirmed , email, first_name, last_name,
@@ -53,7 +50,7 @@ private object UserSql {
          from""" ++ tableName
 }
 
-class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends UserRepository[F] {
+class UserRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends UserRepository[F] {
 
   import UserSql._
 
@@ -88,7 +85,7 @@ class UserRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends Us
 }
 
 object UserRepositoryInterpreter {
-  def apply[F[_]: Monad: Async](
+  def apply[F[_]: Sync: Logger](
     xa: HikariTransactor[F]
   ): UserRepositoryInterpreter[F] =
     new UserRepositoryInterpreter[F](xa)

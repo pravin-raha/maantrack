@@ -1,21 +1,22 @@
 package com.maantrack.repository.doobies
 
-import cats.implicits._
 import cats.data.OptionT
-import cats.effect.Async
+import cats.effect.Sync
+import cats.implicits._
 import com.maantrack.domain.card.{ Card, CardRepository, CardRequest }
+import com.maantrack.repository.doobies.Doobie._
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
-import doobie.util.log.LogHandler
 import doobie.{ Fragments, Query0, Update0 }
+import io.chrisdavenport.log4cats.Logger
 
 object CardSQL {
   import Fragments.whereAnd
 
   def byId(id: Long): Query0[Card] =
     (select ++ whereAnd(fr"card_id = $id"))
-      .queryWithLogHandler[Card](LogHandler.jdkLogHandler)
+      .query[Card]
 
   private def select: Fragment =
     fr"""
@@ -47,7 +48,7 @@ object CardSQL {
        """.update
 }
 
-class CardRepositoryInterpreter[F[_]: Async](xa: HikariTransactor[F]) extends CardRepository[F] {
+class CardRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends CardRepository[F] {
   import CardSQL._
 
   override def add(cardRequest: CardRequest): F[Long] =
