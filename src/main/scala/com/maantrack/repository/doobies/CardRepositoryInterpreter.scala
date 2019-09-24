@@ -5,9 +5,9 @@ import cats.effect.Sync
 import cats.implicits._
 import com.maantrack.domain.card.{ Card, CardRepository, CardRequest }
 import com.maantrack.repository.doobies.Doobie._
-import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
+import doobie.util.transactor.Transactor
 import doobie.{ Fragments, Query0, Update0 }
 import io.chrisdavenport.log4cats.Logger
 
@@ -48,7 +48,7 @@ object CardSQL {
        """.update
 }
 
-class CardRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends CardRepository[F] {
+class CardRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends CardRepository[F] {
   import CardSQL._
 
   override def add(cardRequest: CardRequest): F[Long] =

@@ -6,10 +6,10 @@ import cats.implicits._
 import com.maantrack.domain.user.board.{ AppUserBoard, AppUserBoardRepository }
 import com.maantrack.repository.doobies.Doobie._
 import doobie.Fragments
-import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
 import doobie.util.query.Query0
+import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
 import io.chrisdavenport.log4cats.Logger
 
@@ -34,7 +34,7 @@ object AppUserBoardSQL {
   def delete(id: Long): Update0 = (fr"delete from" ++ tableName ++ whereIdAnd(id)).update
 }
 
-class AppUserBoardRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends AppUserBoardRepository[F] {
+class AppUserBoardRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends AppUserBoardRepository[F] {
   import AppUserBoardSQL._
 
   override def add(userBoard: AppUserBoard): F[Unit] =

@@ -8,9 +8,9 @@ import cats.implicits._
 import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
 import com.maantrack.repository.doobies.Doobie._
 import doobie.Fragments
-import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
+import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
 import io.chrisdavenport.log4cats.Logger
 import io.scalaland.chimney.dsl._
@@ -50,7 +50,7 @@ private object UserSql {
          from""" ++ tableName
 }
 
-class UserRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends UserRepository[F] {
+class UserRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends UserRepository[F] {
 
   import UserSql._
 
@@ -86,7 +86,7 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) ext
 
 object UserRepositoryInterpreter {
   def apply[F[_]: Sync: Logger](
-    xa: HikariTransactor[F]
+    xa: Transactor[F]
   ): UserRepositoryInterpreter[F] =
     new UserRepositoryInterpreter[F](xa)
 }
