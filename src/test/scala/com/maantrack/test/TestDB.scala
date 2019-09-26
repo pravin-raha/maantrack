@@ -2,7 +2,7 @@ package com.maantrack.test
 
 import cats.effect.concurrent.MVar
 import cats.effect.{ ContextShift, IO }
-//import cats.implicits._
+import cats.implicits._
 import com.maantrack.config.DatabaseConfig
 import doobie.implicits._
 import doobie.util.transactor.Transactor
@@ -12,9 +12,9 @@ import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext
 
 class TestDB(config: DatabaseConfig) {
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-//  private val xaReady: MVar[IO, Transactor[IO]] = MVar.empty[IO, Transactor[IO]].unsafeRunSync()
-  private val done: MVar[IO, Unit] = MVar.empty[IO, Unit].unsafeRunSync()
+  implicit val cs: ContextShift[IO]             = IO.contextShift(ExecutionContext.global)
+  private val xaReady: MVar[IO, Transactor[IO]] = MVar.empty[IO, Transactor[IO]].unsafeRunSync()
+  private val done: MVar[IO, Unit]              = MVar.empty[IO, Unit].unsafeRunSync()
 
   val xa: Transactor[IO] = Transactor.fromDriverManager[IO](
     config.driver,
@@ -23,7 +23,7 @@ class TestDB(config: DatabaseConfig) {
     config.password
   )
 
-//  xaReady.put(xa) >> done.take
+  xaReady.put(xa) >> done.take
 
   private val flyway = {
     Flyway
