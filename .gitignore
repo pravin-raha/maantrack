@@ -3,3 +3,5 @@
 target/
 .bloop
 .metals
+.scannerwork
+/project/project
