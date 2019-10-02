@@ -108,4 +108,4 @@ lazy val testDependencies = Seq(
   "org.scalactic"  %% "scalactic"  % scalacticVersion  % "test"
 )
 
-lazy val dbTestingStack = Seq("com.opentable.components" % "otj-pg-embedded" % "0.13.1")
+lazy val dbTestingStack = Seq("com.opentable.components" % "otj-pg-embedded" % "0.13.2")
