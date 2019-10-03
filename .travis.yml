@@ -12,7 +12,11 @@ jobs:
     - env: TEST="scalafmt"
       script: sbt ++$TRAVIS_SCALA_VERSION check
     - env: TEST="compilation"
-      script: sbt ++$TRAVIS_SCALA_VERSION compile test
+      script: sbt ++$TRAVIS_SCALA_VERSION compile coverage test
+      after_success:
+        - sbt ++$TRAVIS_SCALA_VERSION coverageReport
+        - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
+        - sbt ++$TRAVIS_SCALA_VERSION codacyCoverage
 
 cache:
   directories:
