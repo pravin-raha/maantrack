@@ -47,6 +47,7 @@ lazy val chimneyVersion            = "0.3.2"
 lazy val scalaCheckVersion         = "1.14.0"
 lazy val scalaTestVersion          = "3.1.0-M2"
 lazy val scalacticVersion          = "3.0.8"
+lazy val scalaTestPlusVersion      = "3.1.0.0-RC2"
 
 lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-core"      % doobieVersion,
@@ -61,6 +62,7 @@ lazy val http4s = Seq(
   "org.http4s" %% "http4s-dsl"           % http4sVersion,
   "org.http4s" %% "http4s-blaze-server"  % http4sVersion,
   "org.http4s" %% "http4s-circe"         % http4sVersion,
+  "org.http4s" %% "http4s-blaze-client"  % http4sVersion % "test",
   "io.circe"   %% "circe-generic"        % circeVersion,
   "io.circe"   %% "circe-literal"        % circeVersion,
   "io.circe"   %% "circe-generic-extras" % circeGenericExtrasVersion,
@@ -103,9 +105,10 @@ lazy val webjar = Seq(
 )
 
 lazy val testDependencies = Seq(
-  "org.scalacheck" %% "scalacheck" % scalaCheckVersion % "test",
-  "org.scalatest"  %% "scalatest"  % scalaTestVersion  % "test",
-  "org.scalactic"  %% "scalactic"  % scalacticVersion  % "test"
+  "org.scalacheck"    %% "scalacheck"               % scalaCheckVersion    % "test",
+  "org.scalatest"     %% "scalatest"                % scalaTestVersion     % "test",
+  "org.scalactic"     %% "scalactic"                % scalacticVersion     % "test",
+  "org.scalatestplus" %% "scalatestplus-scalacheck" % scalaTestPlusVersion % "test"
 )
 
 lazy val dbTestingStack = Seq("com.opentable.components" % "otj-pg-embedded" % "0.13.2")
