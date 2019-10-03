@@ -1,6 +1,6 @@
 package com.maantrack
 
-import cats.effect.{ Blocker, ConcurrentEffect, ContextShift, Sync }
+import cats.effect.{ ConcurrentEffect, Sync }
 import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
 import com.maantrack.domain.board.BoardService
@@ -12,7 +12,6 @@ import com.maantrack.endpoint.{
   BoardServiceEndpoint,
   CardListServiceEndpoint,
   CardServiceEndpoint,
-  SwaggerUIServiceEndpoint,
   UserServiceEndpoint
 }
 import com.maantrack.repository.doobies.{
@@ -22,7 +21,7 @@ import com.maantrack.repository.doobies.{
   TokenRepositoryInterpreter,
   UserRepositoryInterpreter
 }
-import doobie.hikari.HikariTransactor
+import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.Logger
 import org.http4s.HttpRoutes
 import tsec.authentication.{ BearerTokenAuthenticator, SecuredRequestHandler, TSecBearerToken, TSecTokenSettings }
@@ -30,13 +29,9 @@ import tsec.passwordhashers.PasswordHasher
 
 import scala.concurrent.duration._
 
-class Module[F[_]: Sync: Logger, A](
-  xa: HikariTransactor[F],
-  hasher: PasswordHasher[F, A],
-  blocker: Blocker
-)(
-  implicit F: ConcurrentEffect[F],
-  cs: ContextShift[F]
+class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
+  xa: Transactor[F],
+  hasher: PasswordHasher[F, A]
 ) {
 
   private lazy val userRepoInterpreter: UserRepositoryInterpreter[F] =
@@ -76,8 +71,6 @@ class Module[F[_]: Sync: Logger, A](
       userService,
       hasher
     )
-
-  val swaggerEndpoint: SwaggerUIServiceEndpoint[F] = SwaggerUIServiceEndpoint(blocker)
 
   private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa)
   private val boardService: BoardService[F]                  = new BoardService[F](boardRepository)

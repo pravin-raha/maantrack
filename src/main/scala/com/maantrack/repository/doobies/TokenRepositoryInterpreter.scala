@@ -6,7 +6,6 @@ import cats.implicits._
 import com.maantrack.auth.BearerToken
 import com.maantrack.domain.token.TokenRepository
 import com.maantrack.repository.doobies.Doobie._
-import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
 import doobie.{ Query0, Update0, _ }
@@ -47,7 +46,7 @@ object BearerSQL {
   """.update
 }
 
-class TokenRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends TokenRepository[F] {
+class TokenRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends TokenRepository[F] {
 
   import BearerSQL._
 
@@ -70,7 +69,7 @@ class TokenRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) ex
 
 object TokenRepositoryInterpreter {
   def apply[F[_]: Sync: Logger](
-    xa: HikariTransactor[F]
+    xa: Transactor[F]
   ): TokenRepositoryInterpreter[F] =
     new TokenRepositoryInterpreter[F](xa)
 }

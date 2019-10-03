@@ -6,9 +6,9 @@ import cats.implicits._
 import com.maantrack.domain.board.{ Board, BoardRepository, BoardRequest }
 import com.maantrack.domain.user.board.AppUserBoard
 import com.maantrack.repository.doobies.Doobie._
-import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
+import doobie.util.transactor.Transactor
 import doobie.{ Fragments, Query0, Update0 }
 import io.chrisdavenport.log4cats.Logger
 
@@ -50,7 +50,7 @@ object BoardSQL {
        """.update
 }
 
-class BoardRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends BoardRepository[F] {
+class BoardRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends BoardRepository[F] {
   import BoardSQL._
 
   override def add(userId: Long, boardRequest: BoardRequest): F[Long] =

@@ -4,9 +4,10 @@ import cats.Monad
 import cats.effect._
 import cats.implicits._
 import com.maantrack.config.{ DatabaseConfig, ServerConfig }
+import com.maantrack.endpoint.SwaggerUIServiceEndpoint
 import doobie.util.ExecutionContexts
-import io.chrisdavenport.log4cats.{ Logger, SelfAwareStructuredLogger }
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import io.chrisdavenport.log4cats.{ Logger, SelfAwareStructuredLogger }
 import org.http4s.HttpApp
 import org.http4s.server.blaze._
 import org.http4s.server.{ Router, Server => H4Server }
@@ -41,17 +42,20 @@ object HttpServer {
                )
       blocker <- Blocker[F]
       xa      <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
-      ctx     = new Module(xa, BCrypt.syncPasswordHasher[F], blocker)
+      ctx     = new Module(xa, BCrypt.syncPasswordHasher[F])
       _       <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
       server <- BlazeServerBuilder[F]
                  .bindHttp(serverConfig.port, serverConfig.host)
-                 .withHttpApp(httpApp(ctx))
+                 .withHttpApp(httpApp(ctx, blocker))
                  .resource
     } yield server
 
-  def httpApp[F[_]: Sync: Logger, A](ctx: Module[F, A]): HttpApp[F] = {
+  def httpApp[F[_]: Sync: Logger: ConcurrentEffect: ContextShift, A](
+    ctx: Module[F, A],
+    blocker: Blocker
+  ): HttpApp[F] = {
     Router(
-      "/"      -> ctx.swaggerEndpoint.service,
+      "/"      -> SwaggerUIServiceEndpoint(blocker).service,
       "/user"  -> ctx.userEndpoint,
       "/board" -> ctx.boardServiceEndpoint,
       "/list"  -> ctx.listEndpoint,

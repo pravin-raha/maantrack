@@ -8,9 +8,9 @@ import com.maantrack.domain.organization.{ Organization, OrganizationRepository,
 import com.maantrack.domain.user.User
 import com.maantrack.repository.doobies.Doobie._
 import doobie.free.connection.ConnectionIO
-import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.fragment.Fragment
+import doobie.util.transactor.Transactor
 import doobie.{ Fragments, Update0 }
 import io.chrisdavenport.log4cats.Logger
 
@@ -63,7 +63,7 @@ object OrganizationSQL {
        """.update
 }
 
-class OrganizationRepositoryInterpreter[F[_]: Sync: Logger](xa: HikariTransactor[F]) extends OrganizationRepository[F] {
+class OrganizationRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends OrganizationRepository[F] {
   import OrganizationSQL._
 
   override def add(orgRequest: OrganizationRequest): F[Long] =
