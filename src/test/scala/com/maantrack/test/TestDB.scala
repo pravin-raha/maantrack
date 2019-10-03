@@ -1,5 +1,7 @@
 package com.maantrack.test
 
+//import java.util.Properties
+
 import cats.effect.concurrent.MVar
 import cats.effect.{ ContextShift, IO }
 import cats.implicits._
@@ -25,12 +27,13 @@ class TestDB(config: DatabaseConfig) {
 
   xaReady.put(xa) >> done.take
 
-  private val flyway = {
-    Flyway
-      .configure()
-      .dataSource(config.url, config.user, config.password)
-      .load()
-  }
+//  val properties = new Properties()
+//  properties.setProperty("flyway.locations", "filesystem:/db/migration")
+  private val flyway = Flyway
+    .configure()
+    .dataSource(config.url, config.user, config.password)
+    //    .configuration(properties)
+    .load()
 
   @tailrec
   final def connectAndMigrate(): Unit = {
@@ -47,8 +50,8 @@ class TestDB(config: DatabaseConfig) {
   }
 
   def migrate(): Unit = {
-    flyway.baseline()
     flyway.migrate()
+//    flyway.baseline()
     ()
   }
 
