@@ -59,12 +59,13 @@ class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with 
 
   "/board" should "get board by boardId" in {
     (for {
-      boardResponse            <- request.createAndGetBoard(userRequest, boardRequest)
-      (boardId, authorization) = boardResponse
-      getRequest               <- GET(Uri.unsafeFromString(s"/board/$boardId"))
-      getRequestAuth           = getRequest.putHeaders(authorization.get)
-      getResponse              <- boardRoutes.run(getRequestAuth)
-      getBoard                 <- getResponse.as[Board]
+      userRes            <- request.signUpAndLogIn(userRequest)
+      (_, authorization) = userRes
+      boardId            <- request.createAndGetBoard(authorization, boardRequest)
+      getRequest         <- GET(Uri.unsafeFromString(s"/board/$boardId"))
+      getRequestAuth     = getRequest.putHeaders(authorization.get)
+      getResponse        <- boardRoutes.run(getRequestAuth)
+      getBoard           <- getResponse.as[Board]
     } yield {
       getResponse.status shouldEqual Ok
       getBoard.name shouldEqual boardRequest.name
@@ -77,12 +78,13 @@ class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with 
 
   "/board" should "delete board by boardId" in {
     (for {
-      boardResponse            <- request.createAndGetBoard(userRequest, boardRequest)
-      (boardId, authorization) = boardResponse
-      deleteRequest            <- DELETE(Uri.unsafeFromString(s"/board/$boardId"))
-      deleteRequestAuth        = deleteRequest.putHeaders(authorization.get)
-      deleteResponse           <- boardRoutes.run(deleteRequestAuth)
-      getBoard                 <- deleteResponse.as[Board]
+      userRes            <- request.signUpAndLogIn(userRequest)
+      (_, authorization) = userRes
+      boardId            <- request.createAndGetBoard(authorization, boardRequest)
+      deleteRequest      <- DELETE(Uri.unsafeFromString(s"/board/$boardId"))
+      deleteRequestAuth  = deleteRequest.putHeaders(authorization.get)
+      deleteResponse     <- boardRoutes.run(deleteRequestAuth)
+      getBoard           <- deleteResponse.as[Board]
     } yield {
       deleteResponse.status shouldEqual Ok
       getBoard.name shouldEqual boardRequest.name

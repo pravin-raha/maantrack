@@ -3,8 +3,8 @@ import java.time.Instant
 
 import cats.effect.Sync
 import io.circe.generic.auto._
-import org.http4s.EntityDecoder
-import org.http4s.circe.jsonOf
+import org.http4s.circe.{ jsonEncoderOf, jsonOf }
+import org.http4s.{ EntityDecoder, EntityEncoder }
 
 case class CardList(
   listId: Long,
@@ -23,6 +23,11 @@ case class CardListRequest(
   pos: Int
 )
 
+object CardList {
+  implicit def cardListDecoder[F[_]: Sync]: EntityDecoder[F, CardList] = jsonOf
+}
+
 object CardListRequest {
-  implicit def cardListRequest[F[_]: Sync]: EntityDecoder[F, CardListRequest] = jsonOf
+  implicit def cardListRequestDecoder[F[_]: Sync]: EntityDecoder[F, CardListRequest] = jsonOf
+  implicit def cardListRequestEncoder[F[_]: Sync]: EntityEncoder[F, CardListRequest] = jsonEncoderOf
 }

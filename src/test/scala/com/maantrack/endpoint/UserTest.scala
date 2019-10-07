@@ -43,14 +43,14 @@ class UserTest
     module = new Module(currentDb.xa, hasher)
   }
 
-  "user/login" should "create user and log in" in {
+  "/user/login" should "create user and log in" in {
     val userSignup: UserRequest =
       UserRequest("test@test.com", "fname", "lname", Role.Customer, "test", "test", Instant.now)
     val (_, authorization) = request.signUpAndLogIn(userSignup).unsafeRunSync()
     authorization should be(Symbol("defined"))
   }
 
-  "user" should "get user by userId" in {
+  "/user" should "get user by userId" in {
     (for {
       loginResp                    <- request.signUpAndLogIn(userSignup)
       (createdUser, authorization) = loginResp
@@ -64,7 +64,7 @@ class UserTest
     }).unsafeRunSync
   }
 
-  "user" should "delete user by userId" in {
+  "/user" should "delete user by userId" in {
     (for {
       loginResp                    <- request.signUpAndLogIn(userSignup)
       (createdUser, authorization) = loginResp

@@ -3,6 +3,7 @@ package com.maantrack.test
 import cats.effect.{ IO, Sync }
 import com.maantrack.Module
 import com.maantrack.domain.board.BoardRequest
+import com.maantrack.domain.cardlist.CardListRequest
 import com.maantrack.domain.user.{ UserCredential, UserRequest, UserResponse }
 import org.http4s.circe.jsonOf
 import org.http4s.client.dsl.Http4sClientDsl
@@ -23,6 +24,10 @@ class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] wit
     Router(("/board", module.boardServiceEndpoint)).orNotFound
   }
 
+  private lazy val listRoutes: HttpApp[IO] = {
+    Router(("/list", module.listEndpoint)).orNotFound
+  }
+
   implicit def longDecoder[F[_]: Sync]: EntityDecoder[F, Long] = jsonOf
 
   def signUpAndLogIn(
@@ -40,16 +45,24 @@ class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] wit
     }
 
   def createAndGetBoard(
-    userSignUp: UserRequest,
+    authorization: Option[Authorization],
     boardRequest: BoardRequest
-  ): IO[(Long, Option[Authorization])] =
+  ): IO[Long] =
     for {
-      loginResp          <- signUpAndLogIn(userSignUp)
-      (_, authorization) = loginResp
-      postRequest        <- POST(boardRequest, Uri.unsafeFromString(s"/board"))
-      postRequestAuth    = postRequest.putHeaders(authorization.get)
-      postResponse       <- boardRoutes.run(postRequestAuth)
-      getBoardId         <- postResponse.as[Long]
-    } yield (getBoardId, authorization)
+      postRequest     <- POST(boardRequest, Uri.unsafeFromString(s"/board"))
+      postRequestAuth = postRequest.putHeaders(authorization.get)
+      postResponse    <- boardRoutes.run(postRequestAuth)
+      getBoardId      <- postResponse.as[Long]
+    } yield getBoardId
 
+  def createAndGetCardList(
+    authorization: Option[Authorization],
+    cardListRequest: CardListRequest
+  ): IO[Long] =
+    for {
+      postRequest     <- POST(cardListRequest, Uri.unsafeFromString(s"/list"))
+      postRequestAuth = postRequest.putHeaders(authorization.get)
+      postResponse    <- listRoutes.run(postRequestAuth)
+      getListId       <- postResponse.as[Long]
+    } yield getListId
 }
