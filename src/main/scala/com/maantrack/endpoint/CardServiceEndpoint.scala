@@ -32,7 +32,7 @@ class CardServiceEndpoint[F[_]: Sync](
 
     case DELETE -> Root / LongVar(cardId) asAuthed _ =>
       cardService.deleteById(cardId).value.flatMap {
-        case Some(list) => Ok(list.asJson)
+        case Some(card) => Ok(card.asJson)
         case None       => NotFound(s"Card with card id $cardId not found".asJson)
       }
   }
