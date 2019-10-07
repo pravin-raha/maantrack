@@ -8,8 +8,8 @@ lazy val commonSettings =
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases",
     sonarUseExternalConfig := true,
-    coverageEnabled := false,
-    coverageHighlighting := false
+    coverageEnabled := true,
+    coverageHighlighting := true
   )
 
 lazy val maantrack = project
