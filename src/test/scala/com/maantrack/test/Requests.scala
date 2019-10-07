@@ -3,6 +3,7 @@ package com.maantrack.test
 import cats.effect.{ IO, Sync }
 import com.maantrack.Module
 import com.maantrack.domain.board.BoardRequest
+import com.maantrack.domain.card.CardRequest
 import com.maantrack.domain.cardlist.CardListRequest
 import com.maantrack.domain.user.{ UserCredential, UserRequest, UserResponse }
 import org.http4s.circe.jsonOf
@@ -16,17 +17,12 @@ import tsec.passwordhashers.jca.BCrypt
 
 class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] with Http4sClientDsl[IO] {
 
-  private lazy val userRoutes: HttpApp[IO] = {
-    Router(("/user", module.userEndpoint)).orNotFound
-  }
-
-  private lazy val boardRoutes: HttpApp[IO] = {
-    Router(("/board", module.boardServiceEndpoint)).orNotFound
-  }
-
-  private lazy val listRoutes: HttpApp[IO] = {
-    Router(("/list", module.listEndpoint)).orNotFound
-  }
+  private lazy val routes: HttpApp[IO] = Router(
+    "/user"  -> module.userEndpoint,
+    "/board" -> module.boardServiceEndpoint,
+    "/list"  -> module.listEndpoint,
+    "/card"  -> module.cardEndpoint
+  ).orNotFound
 
   implicit def longDecoder[F[_]: Sync]: EntityDecoder[F, Long] = jsonOf
 
@@ -35,11 +31,11 @@ class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] wit
   ): IO[(UserResponse, Option[Authorization])] =
     for {
       signUpRq   <- POST(userSignUp, uri"/user")
-      signUpResp <- userRoutes.run(signUpRq)
+      signUpResp <- routes.run(signUpRq)
       user       <- signUpResp.as[UserResponse]
       loginBody  = UserCredential(userSignUp.userName, userSignUp.password)
       loginRq    <- POST(loginBody, uri"/user/login")
-      loginResp  <- userRoutes.run(loginRq)
+      loginResp  <- routes.run(loginRq)
     } yield {
       user -> loginResp.headers.get(Authorization)
     }
@@ -51,7 +47,7 @@ class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] wit
     for {
       postRequest     <- POST(boardRequest, Uri.unsafeFromString(s"/board"))
       postRequestAuth = postRequest.putHeaders(authorization.get)
-      postResponse    <- boardRoutes.run(postRequestAuth)
+      postResponse    <- routes.run(postRequestAuth)
       getBoardId      <- postResponse.as[Long]
     } yield getBoardId
 
@@ -62,7 +58,19 @@ class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] wit
     for {
       postRequest     <- POST(cardListRequest, Uri.unsafeFromString(s"/list"))
       postRequestAuth = postRequest.putHeaders(authorization.get)
-      postResponse    <- listRoutes.run(postRequestAuth)
+      postResponse    <- routes.run(postRequestAuth)
       getListId       <- postResponse.as[Long]
     } yield getListId
+
+  def createAndGetCard(
+    authorization: Option[Authorization],
+    cardRequest: CardRequest
+  ): IO[Long] =
+    for {
+      postRequest     <- POST(cardRequest, Uri.unsafeFromString(s"/card"))
+      postRequestAuth = postRequest.putHeaders(authorization.get)
+      postResponse    <- routes.run(postRequestAuth)
+      getCardId       <- postResponse.as[Long]
+    } yield getCardId
+
 }
