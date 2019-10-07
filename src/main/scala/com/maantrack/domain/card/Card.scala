@@ -2,8 +2,8 @@ package com.maantrack.domain.card
 import java.time.Instant
 
 import cats.effect.Sync
-import org.http4s.EntityDecoder
 import io.circe.generic.auto._
+import org.http4s.EntityDecoder
 import org.http4s.circe.jsonOf
 
 case class Card(
