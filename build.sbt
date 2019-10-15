@@ -111,4 +111,4 @@ lazy val testDependencies = Seq(
   "org.scalatestplus" %% "scalatestplus-scalacheck" % scalaTestPlusVersion % "test"
 )
 
-lazy val dbTestingStack = Seq("com.opentable.components" % "otj-pg-embedded" % "0.13.2")
+lazy val dbTestingStack = Seq("com.opentable.components" % "otj-pg-embedded" % "0.13.3")
