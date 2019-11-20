@@ -31,7 +31,7 @@ lazy val maantrack = project
     addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
   )
 
-lazy val doobieVersion             = "0.8.4"
+lazy val doobieVersion             = "0.8.6"
 lazy val http4sVersion             = "0.21.0-M5"
 lazy val flywayVersion             = "6.0.8"
 lazy val tsecVersion               = "0.2.0-M2"
@@ -100,8 +100,8 @@ lazy val refined = Seq(
 )
 
 lazy val webjar = Seq(
-  "org.webjars" % "webjars-locator" % "0.38",
-  "org.webjars" % "swagger-ui"      % "3.24.0"
+  "org.webjars" % "webjars-locator" % "0.37",
+  "org.webjars" % "swagger-ui"      % "3.24.3"
 )
 
 lazy val testDependencies = Seq(
