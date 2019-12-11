@@ -79,7 +79,7 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
       hasher
     )
 
-  private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa)
+  private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa, ctx)
   private val boardService: BoardService[F]                  = new BoardService[F](boardRepository)
   val boardServiceEndpoint: HttpRoutes[F]                    = Auth.liftService(new BoardServiceEndpoint[F](boardService).privateService)
 
