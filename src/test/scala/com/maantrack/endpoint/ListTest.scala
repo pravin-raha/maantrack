@@ -88,7 +88,7 @@ class ListTest extends BaseTest with TestEmbeddedPostgres with Eventually with H
       getCardListId      <- getResponse.as[Long]
     } yield {
       getResponse.status shouldEqual Ok
-      getCardListId shouldEqual boardId
+      getCardListId shouldEqual listId
     }).unsafeRunSync
   }
 }
