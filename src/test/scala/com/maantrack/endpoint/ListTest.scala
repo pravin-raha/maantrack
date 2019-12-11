@@ -8,6 +8,7 @@ import com.maantrack.domain.board.BoardRequest
 import com.maantrack.domain.cardlist.{ CardList, CardListRequest }
 import com.maantrack.domain.user.{ Role, UserRequest }
 import com.maantrack.test.{ BaseTest, Requests, TestEmbeddedPostgres }
+import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits._
@@ -81,16 +82,13 @@ class ListTest extends BaseTest with TestEmbeddedPostgres with Eventually with H
       boardId            <- request.createAndGetBoard(authorization, boardRequest)
       cardListReq        = CardListRequest("name", closed = false, boardId, 0)
       listId             <- request.createAndGetCardList(authorization, cardListReq)
-      getRequest         <- GET(Uri.unsafeFromString(s"/list/$listId"))
+      getRequest         <- DELETE(Uri.unsafeFromString(s"/list/$listId"))
       getRequestAuth     = getRequest.putHeaders(authorization.get)
       getResponse        <- listRoutes.run(getRequestAuth)
-      getCardList        <- getResponse.as[CardList]
+      getCardListId      <- getResponse.as[Long]
     } yield {
       getResponse.status shouldEqual Ok
-      getCardList.name shouldEqual cardListReq.name
-      getCardList.closed shouldEqual cardListReq.closed
-      getCardList.boardId shouldEqual cardListReq.boardId
-      getCardList.pos shouldEqual cardListReq.pos
+      getCardListId shouldEqual boardId
     }).unsafeRunSync
   }
 }
