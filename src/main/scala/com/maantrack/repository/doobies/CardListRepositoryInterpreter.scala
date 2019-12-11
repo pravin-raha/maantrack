@@ -5,27 +5,17 @@ import cats.effect.Sync
 import cats.implicits._
 import com.maantrack.domain.cardlist.{ CardList, CardListRepository, CardListRequest }
 import com.maantrack.repository.doobies.Doobie._
+import doobie.Update0
 import doobie.implicits._
+import doobie.quill.DoobieContext.Postgres
 import doobie.util.fragment.Fragment
 import doobie.util.transactor.Transactor
-import doobie.{ Fragments, Query0, Update0 }
 import io.chrisdavenport.log4cats.Logger
+import io.getquill.SnakeCase
 
 object CardListSQL {
-  import Fragments.whereAnd
 
   private val tableName: Fragment = Fragment.const("list")
-
-  def byId(id: Long): Query0[CardList] =
-    (select ++ whereAnd(fr"list_id = $id"))
-      .query[CardList]
-
-  private def select: Fragment =
-    fr"""
-        select
-             list_id, name, closed, board_id, pos, created_date, modified_date
-        from
-      """ ++ tableName
 
   def insert(listReq: CardListRequest): Update0 =
     (fr"insert into" ++ tableName ++
@@ -43,15 +33,26 @@ object CardListSQL {
     (fr"delete from" ++ tableName ++ fr"where list_id = $id").update
 }
 
-class CardListRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends CardListRepository[F] {
+class CardListRepositoryInterpreter[F[_]: Sync: Logger](
+  xa: Transactor[F],
+  override val ctx: Postgres[SnakeCase] with Decoders
+) extends CardListRepository[F]
+    with Schema {
   import CardListSQL._
+  import ctx._
 
   override def add(listRequest: CardListRequest): F[Long] =
     insert(listRequest)
       .withUniqueGeneratedKeys[Long]("list_id")
       .transact(xa)
 
-  override def getById(id: Long): OptionT[F, CardList] = OptionT(byId(id).option.transact(xa))
+  override def getById(id: Long): OptionT[F, CardList] =
+    OptionT(
+      run(quote {
+        cardListSchema.filter(cl => cl.listId == lift(id))
+      }).map(_.headOption)
+        .transact(xa)
+    )
 
   override def deleteById(id: Long): OptionT[F, CardList] =
     getById(id)

@@ -18,11 +18,15 @@ import com.maantrack.repository.doobies.{
   BoardRepositoryInterpreter,
   CardListRepositoryInterpreter,
   CardRepositoryInterpreter,
+  Decoders,
   TokenRepositoryInterpreter,
   UserRepositoryInterpreter
 }
+import doobie.quill.DoobieContext
+import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.Logger
+import io.getquill.SnakeCase
 import org.http4s.HttpRoutes
 import tsec.authentication.{ BearerTokenAuthenticator, SecuredRequestHandler, TSecBearerToken, TSecTokenSettings }
 import tsec.passwordhashers.PasswordHasher
@@ -33,6 +37,9 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
   xa: Transactor[F],
   hasher: PasswordHasher[F, A]
 ) {
+
+  private lazy val ctx: Postgres[SnakeCase] with Decoders = new DoobieContext.Postgres[SnakeCase](SnakeCase)
+    with Decoders
 
   private lazy val userRepoInterpreter: UserRepositoryInterpreter[F] =
     UserRepositoryInterpreter(xa = xa)
@@ -76,7 +83,7 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
   private val boardService: BoardService[F]                  = new BoardService[F](boardRepository)
   val boardServiceEndpoint: HttpRoutes[F]                    = Auth.liftService(new BoardServiceEndpoint[F](boardService).privateService)
 
-  private lazy val listRepository: CardListRepositoryInterpreter[F] = new CardListRepositoryInterpreter[F](xa)
+  private lazy val listRepository: CardListRepositoryInterpreter[F] = new CardListRepositoryInterpreter[F](xa, ctx)
   private lazy val listService: CardListService[F]                  = new CardListService[F](listRepository)
   val listEndpoint: HttpRoutes[F]                                   = new CardListServiceEndpoint[F](listService, Auth).service
 
