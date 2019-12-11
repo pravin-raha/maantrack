@@ -87,7 +87,7 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
   private lazy val listService: CardListService[F]                  = new CardListService[F](listRepository)
   val listEndpoint: HttpRoutes[F]                                   = new CardListServiceEndpoint[F](listService, Auth).service
 
-  private lazy val cardRepository: CardRepositoryInterpreter[F] = new CardRepositoryInterpreter[F](xa)
+  private lazy val cardRepository: CardRepositoryInterpreter[F] = new CardRepositoryInterpreter[F](xa, ctx)
   private lazy val cardService: CardService[F]                  = new CardService[F](cardRepository)
   val cardEndpoint: HttpRoutes[F]                               = new CardServiceEndpoint[F](cardService, Auth).service
 

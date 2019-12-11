@@ -3,64 +3,38 @@ package com.maantrack.repository.doobies
 import cats.data.OptionT
 import cats.effect.Sync
 import cats.implicits._
+import com.maantrack.db.{ Decoders, Encoders, Schema }
 import com.maantrack.domain.card.{ Card, CardRepository, CardRequest }
-import com.maantrack.repository.doobies.Doobie._
 import doobie.implicits._
-import doobie.util.fragment.Fragment
+import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
-import doobie.{ Fragments, Query0, Update0 }
 import io.chrisdavenport.log4cats.Logger
+import io.getquill.SnakeCase
 
-object CardSQL {
-  import Fragments.whereAnd
-
-  def byId(id: Long): Query0[Card] =
-    (select ++ whereAnd(fr"card_id = $id"))
-      .query[Card]
-
-  private def select: Fragment =
-    fr"""
-        select
-             card_id, closed, description , due, due_completed, board_id, list_id , name, pos , created_date, modified_date
-        from card
-      """
-
-  def insert(cardReq: CardRequest): Update0 =
-    sql"""
-         insert into card
-               (closed, description , due, due_completed, board_id, list_id , name, pos , created_date, modified_date)
-         values
-              (${cardReq.closed}, ${cardReq.description}, ${cardReq.due}, ${cardReq.dueCompleted}, ${cardReq.boardId},
-               ${cardReq.listId}, ${cardReq.name}, ${cardReq.pos}, now(), now())
-       """.update
-
-  def update(card: Card): Update0 =
-    sql"""
-         update card    
-         set name = ${card.name}
-         where card_id = ${card.cardId}
-       """.update
-
-  def delete(id: Long): Update0 =
-    sql"""
-         delete from card
-         where card_id = $id
-       """.update
-}
-
-class CardRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends CardRepository[F] {
-  import CardSQL._
+class CardRepositoryInterpreter[F[_]: Sync: Logger](
+  xa: Transactor[F],
+  override val ctx: Postgres[SnakeCase] with Decoders with Encoders
+) extends CardRepository[F]
+    with Schema {
+  import ctx._
 
   override def add(cardRequest: CardRequest): F[Long] =
-    insert(cardRequest)
-      .withUniqueGeneratedKeys[Long]("card_id")
-      .transact(xa)
+    run(quote {
+      query[Card].insert(lift(cardRequest.toCard)).returning(_.cardId)
+    }).transact(xa)
 
-  override def getById(id: Long): OptionT[F, Card] = OptionT(byId(id).option.transact(xa))
+  override def getById(id: Long): OptionT[F, Card] =
+    OptionT(run(quote {
+      query[Card].filter(_.cardId == lift(id))
+    }).transact(xa).map(_.headOption))
 
-  override def deleteById(id: Long): OptionT[F, Card] =
-    getById(id)
-      .semiflatMap(card => delete(id).run.transact(xa).as(card))
+  override def deleteById(id: Long): F[Long] =
+    run(quote {
+      query[Card].filter(_.cardId == lift(id)).delete
+    }).transact(xa).as(id)
 
-  override def update(card: Card): F[Int] = CardSQL.update(card).run.transact(xa)
+  override def update(card: Card): F[Long] =
+    run(quote {
+      query[Card].filter(_.cardId == lift(card.cardId)).update(lift(card))
+    }).transact(xa).as(card.cardId)
 }
