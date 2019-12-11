@@ -1,6 +1,7 @@
 package com.maantrack.db
 
 import com.maantrack.domain.cardlist.CardList
+import com.maantrack.domain.user.User
 import doobie.quill.DoobieContext.Postgres
 import io.getquill.SnakeCase
 
@@ -12,6 +13,13 @@ trait Schema {
   val cardListSchema: Quoted[EntityQuery[CardList]] = quote {
     querySchema[CardList](
       "list"
+    )
+  }
+
+  val userSchema: Quoted[EntityQuery[User]] = quote {
+    querySchema[User](
+      "app_user",
+      _.userType.roleRepr -> "user_type"
     )
   }
 

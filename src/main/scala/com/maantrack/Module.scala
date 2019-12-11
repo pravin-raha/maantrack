@@ -42,7 +42,7 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
     new DoobieContext.Postgres[SnakeCase](SnakeCase) with Decoders with Encoders
 
   private lazy val userRepoInterpreter: UserRepositoryInterpreter[F] =
-    UserRepositoryInterpreter(xa = xa)
+    UserRepositoryInterpreter(xa = xa, ctx)
   private lazy val userService: UserService[F] = UserService(
     userRepoInterpreter
   )
