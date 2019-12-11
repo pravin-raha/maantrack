@@ -21,7 +21,17 @@ case class CardListRequest(
   closed: Boolean,
   boardId: Long,
   pos: Int
-)
+) { self =>
+  def toCardList: CardList = CardList(
+    0,
+    self.name,
+    self.closed,
+    self.boardId,
+    self.pos,
+    Instant.now(),
+    Instant.now()
+  )
+}
 
 object CardList {
   implicit def cardListDecoder[F[_]: Sync]: EntityDecoder[F, CardList] = jsonOf

@@ -7,7 +7,7 @@ trait CardListRepository[F[_]] {
 
   def getById(id: Long): OptionT[F, CardList]
 
-  def deleteById(id: Long): OptionT[F, CardList]
+  def deleteById(id: Long): F[Long]
 
-  def update(card: CardList): F[Int]
+  def update(card: CardList): F[Long]
 }

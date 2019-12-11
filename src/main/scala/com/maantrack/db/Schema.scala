@@ -1,4 +1,4 @@
-package com.maantrack.repository.doobies
+package com.maantrack.db
 
 import com.maantrack.domain.cardlist.CardList
 import doobie.quill.DoobieContext.Postgres

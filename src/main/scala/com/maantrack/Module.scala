@@ -3,6 +3,7 @@ package com.maantrack
 import cats.effect.{ ConcurrentEffect, Sync }
 import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
+import com.maantrack.db.{ Decoders, Encoders }
 import com.maantrack.domain.board.BoardService
 import com.maantrack.domain.card.CardService
 import com.maantrack.domain.cardlist.CardListService
@@ -18,7 +19,6 @@ import com.maantrack.repository.doobies.{
   BoardRepositoryInterpreter,
   CardListRepositoryInterpreter,
   CardRepositoryInterpreter,
-  Decoders,
   TokenRepositoryInterpreter,
   UserRepositoryInterpreter
 }
@@ -38,8 +38,8 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
   hasher: PasswordHasher[F, A]
 ) {
 
-  private lazy val ctx: Postgres[SnakeCase] with Decoders = new DoobieContext.Postgres[SnakeCase](SnakeCase)
-    with Decoders
+  private lazy val ctx: Postgres[SnakeCase] with Decoders with Encoders =
+    new DoobieContext.Postgres[SnakeCase](SnakeCase) with Decoders with Encoders
 
   private lazy val userRepoInterpreter: UserRepositoryInterpreter[F] =
     UserRepositoryInterpreter(xa = xa)
