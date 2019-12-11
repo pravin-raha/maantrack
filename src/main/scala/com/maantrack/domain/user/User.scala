@@ -6,13 +6,15 @@ import cats.effect.Sync
 import cats.implicits._
 import cats.{ Eq, MonadError }
 import io.circe.generic.auto._
+import io.getquill.Embedded
+import io.scalaland.chimney.dsl._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
 import tsec.authentication.AugmentedJWT
 import tsec.authorization.{ AuthGroup, AuthorizationInfo, BasicRBAC, SimpleAuthEnum }
 import tsec.mac.jca.HMACSHA256
 
-sealed case class Role(roleRepr: String)
+sealed case class Role(roleRepr: String) extends Embedded
 
 case class User(
   userId: Long,
@@ -21,7 +23,7 @@ case class User(
   bio: Option[String] = None,
   confirmed: Option[Boolean] = Some(false),
   email: String,
-  firsName: String,
+  firstName: String,
   lastName: String,
   userType: Role = Role.Customer,
   profileUrl: Option[String] = None,
@@ -34,13 +36,23 @@ case class User(
 
 case class UserRequest(
   email: String,
-  firsName: String,
+  firstName: String,
   lastName: String,
   userType: Role = Role.Customer,
   password: String,
   userName: String,
   birthDate: Instant
-)
+) {
+  self =>
+  def toUser: User =
+    self
+      .into[User]
+      .withFieldConst(_.userId, 0L)
+      .withFieldConst(_.modifiedDate, Instant.now())
+      .withFieldConst(_.createdDate, Instant.now())
+      .enableOptionDefaultsToNone
+      .transform
+}
 
 case class UserResponse(
   userId: Long,
@@ -49,7 +61,7 @@ case class UserResponse(
   bio: Option[String] = None,
   confirmed: Option[Boolean] = Some(false),
   email: String,
-  firsName: String,
+  firstName: String,
   lastName: Option[String] = None,
   userType: Role = Role.Customer,
   profileUrl: Option[String] = None,

@@ -3,6 +3,7 @@ package com.maantrack
 import cats.effect.{ ConcurrentEffect, Sync }
 import cats.implicits._
 import com.maantrack.auth.{ TokenBackingStore, UserBackingStore }
+import com.maantrack.db.{ Decoders, Encoders }
 import com.maantrack.domain.board.BoardService
 import com.maantrack.domain.card.CardService
 import com.maantrack.domain.cardlist.CardListService
@@ -21,8 +22,11 @@ import com.maantrack.repository.doobies.{
   TokenRepositoryInterpreter,
   UserRepositoryInterpreter
 }
+import doobie.quill.DoobieContext
+import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.Logger
+import io.getquill.SnakeCase
 import org.http4s.HttpRoutes
 import tsec.authentication.{ BearerTokenAuthenticator, SecuredRequestHandler, TSecBearerToken, TSecTokenSettings }
 import tsec.passwordhashers.PasswordHasher
@@ -34,8 +38,11 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
   hasher: PasswordHasher[F, A]
 ) {
 
+  private lazy val ctx: Postgres[SnakeCase] with Decoders with Encoders =
+    new DoobieContext.Postgres[SnakeCase](SnakeCase) with Decoders with Encoders
+
   private lazy val userRepoInterpreter: UserRepositoryInterpreter[F] =
-    UserRepositoryInterpreter(xa = xa)
+    UserRepositoryInterpreter(xa = xa, ctx)
   private lazy val userService: UserService[F] = UserService(
     userRepoInterpreter
   )
@@ -72,15 +79,15 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
       hasher
     )
 
-  private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa)
+  private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa, ctx)
   private val boardService: BoardService[F]                  = new BoardService[F](boardRepository)
   val boardServiceEndpoint: HttpRoutes[F]                    = Auth.liftService(new BoardServiceEndpoint[F](boardService).privateService)
 
-  private lazy val listRepository: CardListRepositoryInterpreter[F] = new CardListRepositoryInterpreter[F](xa)
+  private lazy val listRepository: CardListRepositoryInterpreter[F] = new CardListRepositoryInterpreter[F](xa, ctx)
   private lazy val listService: CardListService[F]                  = new CardListService[F](listRepository)
   val listEndpoint: HttpRoutes[F]                                   = new CardListServiceEndpoint[F](listService, Auth).service
 
-  private lazy val cardRepository: CardRepositoryInterpreter[F] = new CardRepositoryInterpreter[F](xa)
+  private lazy val cardRepository: CardRepositoryInterpreter[F] = new CardRepositoryInterpreter[F](xa, ctx)
   private lazy val cardService: CardService[F]                  = new CardService[F](cardRepository)
   val cardEndpoint: HttpRoutes[F]                               = new CardServiceEndpoint[F](cardService, Auth).service
 

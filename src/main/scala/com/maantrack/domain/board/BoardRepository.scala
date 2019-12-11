@@ -7,7 +7,7 @@ trait BoardRepository[F[_]] {
 
   def getById(id: Long): OptionT[F, Board]
 
-  def deleteById(id: Long): OptionT[F, Board]
+  def deleteById(id: Long): F[Long]
 
-  def update(board: Board): F[Int]
+  def update(board: Board): F[Long]
 }

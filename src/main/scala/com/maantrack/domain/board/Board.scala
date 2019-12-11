@@ -3,6 +3,7 @@ import java.time.Instant
 
 import cats.effect.Sync
 import io.circe.generic.auto._
+import io.scalaland.chimney.dsl._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
 
@@ -25,7 +26,17 @@ case class BoardRequest(
   pinned: Boolean,
   boardUrl: String,
   starred: Boolean
-)
+) {
+  self =>
+
+  def toBoard: Board =
+    self
+      .into[Board]
+      .withFieldConst(_.boardId, 0L)
+      .withFieldConst(_.createdDate, Instant.now())
+      .withFieldConst(_.modifiedDate, Instant.now())
+      .transform
+}
 
 object BoardRequest {
   implicit def boardRequestDecoder[F[_]: Sync]: EntityDecoder[F, BoardRequest] = jsonOf

@@ -3,6 +3,7 @@ import java.time.Instant
 
 import cats.effect.Sync
 import io.circe.generic.auto._
+import io.scalaland.chimney.dsl._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
 
@@ -29,7 +30,18 @@ case class CardRequest(
   listId: Long,
   name: String,
   pos: Int
-)
+) {
+  self =>
+
+  def toCard: Card =
+    self
+      .into[Card]
+      .withFieldConst(_.cardId, 0L)
+      .withFieldConst(_.createdDate, Instant.now())
+      .withFieldConst(_.modifiedDate, Instant.now())
+      .transform
+
+}
 
 object Card {
   implicit def cardDecoder[F[_]: Sync]: EntityDecoder[F, Card] = jsonOf

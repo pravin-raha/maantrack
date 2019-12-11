@@ -9,6 +9,7 @@ import com.maantrack.domain.card.{ Card, CardRequest }
 import com.maantrack.domain.cardlist.CardListRequest
 import com.maantrack.domain.user.{ Role, UserRequest }
 import com.maantrack.test.{ BaseTest, Requests, TestEmbeddedPostgres }
+import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Authorization
@@ -89,21 +90,15 @@ class CardTest extends BaseTest with TestEmbeddedPostgres with Eventually with H
 
   "/card" should "delete card by cardId" in {
     (for {
-      cardReq                              <- createCardAndGetId
-      (authorization, cardId, cardRequest) = cardReq
-      getRequest                           <- DELETE(Uri.unsafeFromString(s"/card/$cardId"))
-      getRequestAuth                       = getRequest.putHeaders(authorization.get)
-      getResponse                          <- cardRoute.run(getRequestAuth)
-      getCard                              <- getResponse.as[Card]
+      cardReq                    <- createCardAndGetId
+      (authorization, cardId, _) = cardReq
+      getRequest                 <- DELETE(Uri.unsafeFromString(s"/card/$cardId"))
+      getRequestAuth             = getRequest.putHeaders(authorization.get)
+      getResponse                <- cardRoute.run(getRequestAuth)
+      getCardId                  <- getResponse.as[Long]
     } yield {
       getResponse.status shouldEqual Ok
-      getCard.name shouldEqual cardRequest.name
-      getCard.closed shouldEqual cardRequest.closed
-      getCard.boardId shouldEqual cardRequest.boardId
-      getCard.pos shouldEqual cardRequest.pos
-      getCard.listId shouldEqual cardRequest.listId
-      getCard.dueCompleted shouldEqual cardRequest.dueCompleted
-      getCard.description shouldEqual cardRequest.description
+      getCardId shouldEqual cardId
     }).unsafeRunSync
   }
 

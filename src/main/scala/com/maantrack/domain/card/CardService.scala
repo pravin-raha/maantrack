@@ -8,7 +8,7 @@ class CardService[F[_]: Async](cardRepository: CardRepository[F]) {
 
   def add(cardRequest: CardRequest): F[Long] = cardRepository.add(cardRequest)
 
-  def update(card: Card): F[Int] = cardRepository.update(card)
+  def update(card: Card): F[Long] = cardRepository.update(card)
 
-  def deleteById(id: Long): OptionT[F, Card] = cardRepository.deleteById(id)
+  def deleteById(id: Long): F[Long] = cardRepository.deleteById(id)
 }

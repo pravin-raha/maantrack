@@ -7,6 +7,7 @@ import com.maantrack.Module
 import com.maantrack.domain.board.{ Board, BoardRequest }
 import com.maantrack.domain.user.{ Role, UserRequest }
 import com.maantrack.test.{ BaseTest, Requests, TestEmbeddedPostgres }
+import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits._
@@ -84,14 +85,10 @@ class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with 
       deleteRequest      <- DELETE(Uri.unsafeFromString(s"/board/$boardId"))
       deleteRequestAuth  = deleteRequest.putHeaders(authorization.get)
       deleteResponse     <- boardRoutes.run(deleteRequestAuth)
-      getBoard           <- deleteResponse.as[Board]
+      getBoard           <- deleteResponse.as[Long]
     } yield {
       deleteResponse.status shouldEqual Ok
-      getBoard.name shouldEqual boardRequest.name
-      getBoard.description shouldEqual boardRequest.description
-      getBoard.starred shouldEqual boardRequest.starred
-      getBoard.closed shouldEqual boardRequest.closed
-      getBoard.pinned shouldEqual boardRequest.pinned
+      getBoard shouldEqual boardId
     }).unsafeRunSync
   }
 }

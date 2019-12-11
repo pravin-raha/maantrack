@@ -1,92 +1,59 @@
 package com.maantrack.repository.doobies
 
-import java.time.Instant
-
 import cats.data.OptionT
 import cats.effect.Sync
 import cats.implicits._
+import com.maantrack.db.{ Decoders, Encoders, Schema }
 import com.maantrack.domain.user.{ User, UserRepository, UserRequest }
-import com.maantrack.repository.doobies.Doobie._
-import doobie.Fragments
 import doobie.implicits._
-import doobie.util.fragment.Fragment
+import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
-import doobie.util.update.Update0
 import io.chrisdavenport.log4cats.Logger
-import io.scalaland.chimney.dsl._
+import io.getquill.SnakeCase
 
-private object UserSql {
-  import Fragments.whereAnd
+class UserRepositoryInterpreter[F[_]: Sync: Logger](
+  xa: Transactor[F],
+  override val ctx: Postgres[SnakeCase] with Decoders with Encoders
+) extends UserRepository[F]
+    with Schema {
 
-  private val tableName: Fragment = Fragment.const("app_user")
+  import ctx._
+  implicit val userUpdateMeta: UpdateMeta[User] = updateMeta[User](_.userId)
+//  implicit val userInsertMeta: InsertMeta[User] = insertMeta[User](_.userId)
 
-  def insert[F[_]: Logger](userRequest: UserRequest): Update0 =
-    (fr"""INSERT INTO""" ++ tableName ++
-      fr"""( email, first_name, last_name, user_type, password, birth_date,
-             user_name, created_date, modified_date )
-          VALUES
-          (
-             ${userRequest.email}, ${userRequest.firsName}, ${userRequest.lastName}, ${userRequest.userType}
-           , ${userRequest.password}, ${userRequest.birthDate}
-           , ${userRequest.userName}, NOW(), NOW()
-          )""").update
+  private def selectUserById(id: Long): Quoted[EntityQuery[User]] = quote {
+    userSchema.filter(_.userId == lift(id))
+  }
 
-  def selectById[F[_]: Logger](id: Long): doobie.Query0[User] =
-    (select ++ whereAnd(fr"app_user_id = $id")).query[User]
-
-  def delete[F[_]: Logger](id: Long): doobie.Update0 =
-    (fr"DELETE FROM" ++ tableName ++ fr"app_user WHERE app_user_id = $id").update
-
-  def update[F[_]: Logger](user: User): doobie.Update0 =
-    (fr"UPDATE" ++ tableName ++ fr"set app_user_id = ${user.userId}, name = ${user.firsName}, email = ${user.email} WHERE app_user_id = ${user.userId}").update
-
-  def selectByUserName[F[_]: Logger](username: String): doobie.Query0[User] =
-    (select ++ whereAnd(fr"user_name = $username"))
-      .query[User]
-
-  private val select =
-    fr"""select app_user_id, avatar_url, avatar_source, bio, confirmed , email, first_name, last_name,
-                user_type, profile_url, password, user_name, birth_date, created_date, modified_date 
-         from""" ++ tableName
-}
-
-class UserRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends UserRepository[F] {
-
-  import UserSql._
-
-  private val now = Instant.now()
+  private def selectUserByUserName(userName: String): Quoted[EntityQuery[User]] = quote {
+    userSchema.filter(_.userName == lift(userName))
+  }
 
   override def addUser(userRequest: UserRequest): F[User] =
-    insert(userRequest)
-      .withUniqueGeneratedKeys[Long]("app_user_id")
-      .map(
-        id =>
-          userRequest
-            .into[User]
-            .withFieldConst(_.userId, id)
-            .withFieldConst(_.modifiedDate, now)
-            .withFieldConst(_.createdDate, now)
-            .transform
-      )
-      .transact(xa)
+    run(quote {
+      userSchema.insert(lift(userRequest.toUser)).returningGenerated(_.userId)
+    }).transact(xa).map(userId => userRequest.toUser.copy(userId = userId))
 
   override def deleteUserById(id: Long): OptionT[F, User] =
     getUserById(id)
-      .semiflatMap(user => delete(id).run.transact(xa).as(user))
+      .semiflatMap(user => run(selectUserById(id).delete).transact(xa).as(user))
 
   override def getUserById(id: Long): OptionT[F, User] =
-    OptionT(selectById(id).option.transact(xa))
+    OptionT(run(selectUserById(id)).transact(xa).map(_.headOption))
 
   override def updateUser(user: User): OptionT[F, User] =
-    OptionT.liftF(UserSql.update(user).run.transact(xa).as(user))
+    OptionT.liftF(run(quote {
+      userSchema.filter(_.userId == user.userId).update(lift(user))
+    }).transact(xa).as(user))
 
   override def getUserByUserName(userName: String): OptionT[F, User] =
-    OptionT(selectByUserName(userName).option.transact(xa))
+    OptionT(run(selectUserByUserName(userName)).transact(xa).map(_.headOption))
 }
 
 object UserRepositoryInterpreter {
   def apply[F[_]: Sync: Logger](
-    xa: Transactor[F]
+    xa: Transactor[F],
+    ctx: Postgres[SnakeCase] with Decoders with Encoders
   ): UserRepositoryInterpreter[F] =
-    new UserRepositoryInterpreter[F](xa)
+    new UserRepositoryInterpreter[F](xa, ctx)
 }

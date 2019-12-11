@@ -1,15 +1,15 @@
 package com.maantrack.endpoint
 
-import cats.implicits._
 import cats.effect.Sync
+import cats.implicits._
 import com.maantrack.domain.card.{ CardRequest, CardService }
 import com.maantrack.domain.user.User
+import io.circe.generic.auto._
+import io.circe.syntax._
+import org.http4s.HttpRoutes
+import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import tsec.authentication.{ SecuredRequestHandler, TSecAuthService, TSecBearerToken, asAuthed }
-import org.http4s.circe._
-import io.circe.syntax._
-import io.circe.generic.auto._
-import org.http4s.HttpRoutes
 
 class CardServiceEndpoint[F[_]: Sync](
   cardService: CardService[F],
@@ -31,10 +31,7 @@ class CardServiceEndpoint[F[_]: Sync](
       }
 
     case DELETE -> Root / LongVar(cardId) asAuthed _ =>
-      cardService.deleteById(cardId).value.flatMap {
-        case Some(card) => Ok(card.asJson)
-        case None       => NotFound(s"Card with card id $cardId not found".asJson)
-      }
+      cardService.deleteById(cardId).flatMap(cId => Ok(cId.asJson))
   }
 
   val service: HttpRoutes[F] = Auth.liftService(cardEndpoint)

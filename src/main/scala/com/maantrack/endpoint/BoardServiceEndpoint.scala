@@ -6,9 +6,9 @@ import com.maantrack.domain.board.{ BoardRequest, BoardService }
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.circe.generic.auto._
 import io.circe.syntax._
+import org.http4s.Response
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.Response
 import tsec.authentication._
 
 class BoardServiceEndpoint[F[_]: Sync](
@@ -39,9 +39,8 @@ class BoardServiceEndpoint[F[_]: Sync](
       }
 
     case DELETE -> Root / LongVar(boardId) asAuthed _ =>
-      boardService.deleteById(boardId).value.flatMap {
-        case Some(board) => Ok(board.asJson)
-        case None        => NotFound(s"Board with board id $boardId not found".asJson)
+      boardService.deleteById(boardId).flatMap { boardId =>
+        Ok(boardId.asJson)
       }
   }
 
