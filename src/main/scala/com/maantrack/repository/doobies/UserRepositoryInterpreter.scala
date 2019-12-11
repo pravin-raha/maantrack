@@ -19,7 +19,7 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
 
   import ctx._
   implicit val userUpdateMeta: UpdateMeta[User] = updateMeta[User](_.userId)
-  implicit val userInsertMeta: InsertMeta[User] = insertMeta[User](_.userId)
+//  implicit val userInsertMeta: InsertMeta[User] = insertMeta[User](_.userId)
 
   private def selectUserById(id: Long): Quoted[EntityQuery[User]] = quote {
     userSchema.filter(_.userId == lift(id))
@@ -31,8 +31,8 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
 
   override def addUser(userRequest: UserRequest): F[User] =
     run(quote {
-      userSchema.insert(lift(userRequest.toUser)).returning(_.userId)
-    }).transact(xa).map(id => userRequest.toUser.copy(userId = id))
+      userSchema.insert(lift(userRequest.toUser)).returningGenerated(_.userId)
+    }).transact(xa).map(userId => userRequest.toUser.copy(userId = userId))
 
   override def deleteUserById(id: Long): OptionT[F, User] =
     getUserById(id)

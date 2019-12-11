@@ -19,7 +19,8 @@ trait Schema {
   val userSchema: Quoted[EntityQuery[User]] = quote {
     querySchema[User](
       "app_user",
-      _.userType.roleRepr -> "user_type"
+      _.userType.roleRepr -> "user_type",
+      _.userId            -> "app_user_id"
     )
   }
 

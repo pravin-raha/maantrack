@@ -50,6 +50,7 @@ case class UserRequest(
       .withFieldConst(_.userId, 0L)
       .withFieldConst(_.modifiedDate, Instant.now())
       .withFieldConst(_.createdDate, Instant.now())
+      .enableOptionDefaultsToNone
       .transform
 }
 
