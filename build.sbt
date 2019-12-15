@@ -31,7 +31,7 @@ lazy val maantrack = project
     addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
   )
 
-lazy val doobieVersion             = "0.8.6"
+lazy val doobieVersion             = "0.8.7"
 lazy val http4sVersion             = "0.21.0-M6"
 lazy val flywayVersion             = "6.1.1"
 lazy val tsecVersion               = "0.2.0-M2"
