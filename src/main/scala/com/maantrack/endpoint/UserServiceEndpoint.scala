@@ -1,5 +1,7 @@
 package com.maantrack.endpoint
 
+import java.time.Instant
+
 import cats.effect._
 import cats.implicits._
 import com.maantrack.domain.Error
@@ -10,21 +12,17 @@ import io.circe.syntax._
 import io.scalaland.chimney.dsl._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{ HttpRoutes, Response }
-import tsec.authentication.{ TSecAuthService, _ }
-import tsec.common.Verified
-import tsec.passwordhashers.{ PasswordHash, PasswordHasher }
+import org.http4s.{ AuthedRoutes, HttpRoutes, Response }
+import pdi.jwt.{ Jwt, JwtAlgorithm }
 
-class UserServiceEndpoint[F[_]: Sync: Logger, A](
-  bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
-  userService: UserService[F],
-  hasher: PasswordHasher[F, A]
+class UserServiceEndpoint[F[_]: Sync: Logger](
+  userService: UserService[F]
 ) extends Http4sDsl[F] {
   private val userCreateService = HttpRoutes.of[F] {
     case req @ POST -> Root =>
       for {
         userRequest <- req.as[UserRequest]
-        hash        <- hasher.hashpw(userRequest.password.getBytes)
+        hash        = userRequest.password //TODO add new hasher
         userRes <- userService
                     .addUser(userRequest.copy(password = hash))
                     .map(_.into[UserResponse].transform)
@@ -32,8 +30,8 @@ class UserServiceEndpoint[F[_]: Sync: Logger, A](
       } yield result
   }
 
-  private val uService: AuthService[F] = TSecAuthService {
-    case GET -> Root / LongVar(userId) asAuthed _ =>
+  private val uService: AuthedRoutes[User, F] = AuthedRoutes.of {
+    case GET -> Root / LongVar(userId) as _ =>
       userService
         .getUserById(userId)
         .value
@@ -41,7 +39,7 @@ class UserServiceEndpoint[F[_]: Sync: Logger, A](
           case Some(user) => Ok(user.into[UserResponse].transform.asJson)
           case None       => NotFound(s"User with user id $userId not found".asJson)
         }
-    case DELETE -> Root / LongVar(userId) asAuthed _ =>
+    case DELETE -> Root / LongVar(userId) as _ =>
       userService
         .deleteUserById(userId)
         .value
@@ -52,20 +50,28 @@ class UserServiceEndpoint[F[_]: Sync: Logger, A](
   }
 
   private val loginService: HttpRoutes[F] = HttpRoutes.of[F] {
-    case req @ POST -> Root / "login" =>
+
+    case _ @POST -> Root / "login" =>
       val res: F[Response[F]] = for {
-        userCredential <- req.as[UserCredential]
-        user <- userService
-                 .getUserByUserName(userCredential.userName)
-                 .toRight(Error.NotFound("Bad Credential"): Throwable)
-                 .value
-                 .flatMap(_.liftTo[F])
-        hash   = PasswordHash[A](user.password)
-        status <- hasher.checkpw(userCredential.password.getBytes, hash)
-        resp <- if (status == Verified) Ok()
-               else Sync[F].raiseError[Response[F]](Error.BadLogin())
-        tok <- bearerTokenAuth.create(user.userId)
-      } yield bearerTokenAuth.embed(resp, tok)
+//        userCredential <- req.as[UserCredential]
+//        user <- userService
+//                 .getUserByUserName(userCredential.userName)
+//                 .toRight(Error.NotFound("Bad Credential"): Throwable)
+//                 .value
+//                 .flatMap(_.liftTo[F])
+//        hash   = PasswordHash[A](user.password)
+//        status <- hasher.checkpw(userCredential.password.getBytes, hash)
+        resp <- /*if (status == Verified) */ Ok()
+//               else Sync[F].raiseError[Response[F]](Error.BadLogin())
+        tok = Jwt.encode(
+          UserRequest("test@test.com", "fname", "lname", Role.Customer, "test", "test", Instant.now).asJson.toString(),
+          "53cr3t",
+          JwtAlgorithm.HS256
+        )
+      } yield {
+        print(tok)
+        resp.addCookie("token", tok)
+      }
 
       res.recoverWith {
         case n: Error.NotFound => NotFound(n.msg)
@@ -73,21 +79,18 @@ class UserServiceEndpoint[F[_]: Sync: Logger, A](
       }
   }
 
-  val publicService: HttpRoutes[F]   = loginService <+> userCreateService
-  val privateService: AuthService[F] = uService
+  val publicService: HttpRoutes[F]          = loginService <+> userCreateService
+  val privateService: AuthedRoutes[User, F] = uService
+
 }
 
 object UserServiceEndpoint {
-  def apply[F[_]: Sync: Logger, A](
-    bearerTokenAuth: BearerTokenAuthenticator[F, Long, User],
-    userService: UserService[F],
-    hasher: PasswordHasher[F, A]
+  def apply[F[_]: Sync: Logger](
+    userService: UserService[F]
   )(
     implicit F: ConcurrentEffect[F]
-  ): UserServiceEndpoint[F, A] =
+  ): UserServiceEndpoint[F] =
     new UserServiceEndpoint(
-      bearerTokenAuth,
-      userService,
-      hasher
+      userService
     )
 }

@@ -6,32 +6,31 @@ import com.maantrack.domain.cardlist.{ CardListRequest, CardListService }
 import com.maantrack.domain.user.User
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.http4s.HttpRoutes
+import org.http4s.AuthedRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import tsec.authentication.{ SecuredRequestHandler, TSecAuthService, TSecBearerToken, asAuthed }
 
 class CardListServiceEndpoint[F[_]: Sync](
-  cardListService: CardListService[F],
-  Auth: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]]
+  cardListService: CardListService[F]
 ) extends Http4sDsl[F] {
-  private val authService: AuthService[F] = TSecAuthService {
-    case req @ POST -> Root asAuthed _ =>
+
+  private val authService: AuthedRoutes[User, F] = AuthedRoutes.of {
+    case req @ POST -> Root as _ =>
       for {
-        cardListReq <- req.request.as[CardListRequest]
+        cardListReq <- req.req.as[CardListRequest]
         id          <- cardListService.add(cardListReq)
         res         <- Ok(id.asJson)
       } yield res
 
-    case GET -> Root / LongVar(cardListId) asAuthed _ =>
+    case GET -> Root / LongVar(cardListId) as _ =>
       cardListService.getById(cardListId).value.flatMap {
         case Some(list) => Ok(list.asJson)
         case None       => NotFound(s"List with list id $cardListId not found".asJson)
       }
 
-    case DELETE -> Root / LongVar(cardListId) asAuthed _ =>
+    case DELETE -> Root / LongVar(cardListId) as _ =>
       cardListService.deleteById(cardListId).flatMap(list => Ok(list.asJson))
   }
 
-  val service: HttpRoutes[F] = Auth.liftService(authService)
+  val privateService: AuthedRoutes[User, F] = authService
 }

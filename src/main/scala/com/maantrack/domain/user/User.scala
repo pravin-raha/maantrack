@@ -3,16 +3,11 @@ package com.maantrack.domain.user
 import java.time.Instant
 
 import cats.effect.Sync
-import cats.implicits._
-import cats.{ Eq, MonadError }
 import io.circe.generic.auto._
 import io.getquill.Embedded
 import io.scalaland.chimney.dsl._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
-import tsec.authentication.AugmentedJWT
-import tsec.authorization.{ AuthGroup, AuthorizationInfo, BasicRBAC, SimpleAuthEnum }
-import tsec.mac.jca.HMACSHA256
 
 sealed case class Role(roleRepr: String) extends Embedded
 
@@ -73,29 +68,9 @@ case class UserResponse(
 
 case class UserCredential(userName: String, password: String)
 
-object Role extends SimpleAuthEnum[Role, String] {
+object Role {
   lazy val Customer: Role      = Role("User")
   lazy val Administrator: Role = Role("Administrator")
-
-  implicit val E: Eq[Role] = Eq.fromUniversalEquals[Role]
-  def AdminRequired[F[_]: Sync]: BasicRBAC[F, Role, User, AugmentedJWT[HMACSHA256, Long]] =
-    BasicRBAC[F, Role, User, AugmentedJWT[HMACSHA256, Long]](Administrator)
-  def CustomerRequired[F[_]: Sync]: BasicRBAC[F, Role, User, AugmentedJWT[HMACSHA256, Long]] =
-    BasicRBAC[F, Role, User, AugmentedJWT[HMACSHA256, Long]](
-      Administrator,
-      Customer
-    )
-  protected val values: AuthGroup[Role] =
-    AuthGroup(Administrator, Customer)
-
-  override def getRepr(t: Role): String = t.roleRepr
-}
-
-object User {
-  implicit def authRole[F[_]](
-    implicit F: MonadError[F, Throwable]
-  ): AuthorizationInfo[F, Role, User] =
-    (u: User) => F.pure(u.userType)
 }
 
 object UserResponse {

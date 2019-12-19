@@ -18,7 +18,6 @@ lazy val maantrack = project
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= http4s,
-    libraryDependencies ++= tsec,
     libraryDependencies ++= doobie,
     libraryDependencies ++= common,
     libraryDependencies ++= refined,
@@ -28,13 +27,13 @@ lazy val maantrack = project
   )
   .settings(
     addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt"),
-    addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
+    addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck"),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
   )
 
 lazy val doobieVersion             = "0.8.8"
 lazy val http4sVersion             = "0.21.0-M6"
 lazy val flywayVersion             = "6.1.3"
-lazy val tsecVersion               = "0.2.0-M2"
 lazy val circeVersion              = "0.12.3"
 lazy val circeGenericExtrasVersion = "0.12.2"
 lazy val circeConfigVersion        = "0.7.0"
@@ -70,7 +69,9 @@ lazy val http4s = Seq(
   "io.circe"   %% "circe-generic-extras" % circeGenericExtrasVersion,
   "io.circe"   %% "circe-parser"         % circeVersion,
   "io.circe"   %% "circe-core"           % circeVersion,
-  "io.circe"   %% "circe-config"         % circeConfigVersion
+  "io.circe"   %% "circe-config"         % circeConfigVersion,
+//  "com.pauldijou"  %% "jwt-core"             % "4.2.0",
+  "dev.profunktor" %% "http4s-jwt-auth" % "0.0.3"
 )
 
 lazy val common = Seq(
@@ -81,20 +82,6 @@ lazy val common = Seq(
   "io.chrisdavenport"     %% "log4cats-slf4j"      % log4catsSlf4jVersion,
   "ch.qos.logback"        % "logback-classic"      % "1.2.3",
   "io.scalaland"          %% "chimney"             % chimneyVersion
-)
-
-lazy val tsec = Seq(
-  "io.github.jmcardon" %% "tsec-common"        % tsecVersion,
-  "io.github.jmcardon" %% "tsec-password"      % tsecVersion,
-  "io.github.jmcardon" %% "tsec-cipher-jca"    % tsecVersion,
-  "io.github.jmcardon" %% "tsec-cipher-bouncy" % tsecVersion,
-  "io.github.jmcardon" %% "tsec-mac"           % tsecVersion,
-  "io.github.jmcardon" %% "tsec-signatures"    % tsecVersion,
-  "io.github.jmcardon" %% "tsec-hash-jca"      % tsecVersion,
-  "io.github.jmcardon" %% "tsec-hash-bouncy"   % tsecVersion,
-  "io.github.jmcardon" %% "tsec-jwt-mac"       % tsecVersion,
-  "io.github.jmcardon" %% "tsec-jwt-sig"       % tsecVersion,
-  "io.github.jmcardon" %% "tsec-http4s"        % tsecVersion
 )
 
 lazy val refined = Seq(
