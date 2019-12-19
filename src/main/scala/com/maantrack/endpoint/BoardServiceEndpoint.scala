@@ -3,22 +3,22 @@ package com.maantrack.endpoint
 import cats.effect._
 import cats.implicits._
 import com.maantrack.domain.board.{ BoardRequest, BoardService }
+import com.maantrack.domain.user.User
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.http4s.Response
+import org.http4s.{ AuthedRoutes, Response }
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import tsec.authentication._
 
 class BoardServiceEndpoint[F[_]: Sync](
   boardService: BoardService[F]
 ) extends Http4sDsl[F] {
 
-  private val boardCreateService: AuthService[F] = TSecAuthService {
-    case req @ POST -> Root asAuthed user =>
+  private val boardCreateService: AuthedRoutes[User, F] = AuthedRoutes.of {
+    case req @ POST -> Root as user =>
       val res: F[Response[F]] = for {
-        board  <- req.request.as[BoardRequest]
+        board  <- req.req.as[BoardRequest]
         id     <- boardService.add(user.userId, board)
         result <- Ok(id.asJson)
       } yield result
@@ -32,19 +32,19 @@ class BoardServiceEndpoint[F[_]: Sync](
           } yield b
       }
 
-    case GET -> Root / LongVar(boardId) asAuthed _ =>
+    case GET -> Root / LongVar(boardId) as _ =>
       boardService.getById(boardId).value.flatMap {
         case Some(board) => Ok(board.asJson)
         case None        => NotFound(s"Board with board id $boardId not found".asJson)
       }
 
-    case DELETE -> Root / LongVar(boardId) asAuthed _ =>
+    case DELETE -> Root / LongVar(boardId) as _ =>
       boardService.deleteById(boardId).flatMap { boardId =>
         Ok(boardId.asJson)
       }
   }
 
-  val privateService: AuthService[F] = boardCreateService
+  val privateService: AuthedRoutes[User, F] = boardCreateService
 
 }
 

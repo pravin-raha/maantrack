@@ -361,7 +361,7 @@ definitions:
         type: "string"
       email:
         type: "string"
-      firsName:
+      firstName:
         type: "string"
       lastName:
         type: "string"
@@ -390,7 +390,7 @@ definitions:
     required:
       - "userName"
       - "email"
-      - "firsName"
+      - "firstName"
       - "lastName"
       - "userType"
       - "password"
@@ -398,7 +398,7 @@ definitions:
     properties:
       email:
         type: "string"
-      firsName:
+      firstName:
         type: "string"
       lastName:
         type: "string"

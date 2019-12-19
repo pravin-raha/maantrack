@@ -13,7 +13,6 @@ import org.http4s.server.blaze._
 import org.http4s.server.{ Router, Server => H4Server }
 import org.http4s.syntax.all._
 import pureconfig.ConfigSource
-import tsec.passwordhashers.jca.BCrypt
 import pureconfig.generic.auto._
 
 object Main extends IOApp {
@@ -22,12 +21,12 @@ object Main extends IOApp {
     Slf4jLogger.getLogger[IO]
 
   override def run(args: List[String]): IO[ExitCode] =
-    HttpServer.stream[IO, BCrypt].use(_ => IO.never).as(ExitCode.Success)
+    HttpServer.stream[IO].use(_ => IO.never).as(ExitCode.Success)
 }
 
 object HttpServer {
 
-  def stream[F[_]: ConcurrentEffect: ContextShift: Timer: Logger, A]: Resource[F, H4Server[F]] =
+  def stream[F[_]: ConcurrentEffect: ContextShift: Timer: Logger]: Resource[F, H4Server[F]] =
     for {
       serverConfig <- Resource.liftF(
                        Monad[F].pure(
@@ -42,7 +41,7 @@ object HttpServer {
                )
       blocker <- Blocker[F]
       xa      <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
-      ctx     = new Module(xa, BCrypt.syncPasswordHasher[F])
+      ctx     = new Module(xa)
       _       <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
       server <- BlazeServerBuilder[F]
                  .bindHttp(serverConfig.port, serverConfig.host)
@@ -50,8 +49,8 @@ object HttpServer {
                  .resource
     } yield server
 
-  def httpApp[F[_]: Sync: Logger: ConcurrentEffect: ContextShift, A](
-    ctx: Module[F, A],
+  def httpApp[F[_]: Sync: Logger: ConcurrentEffect: ContextShift](
+    ctx: Module[F],
     blocker: Blocker
   ): HttpApp[F] = {
     Router(
