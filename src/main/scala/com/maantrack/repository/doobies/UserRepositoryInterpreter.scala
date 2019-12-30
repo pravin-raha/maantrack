@@ -16,7 +16,6 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
   override val ctx: Postgres[SnakeCase] with Decoders with Encoders
 ) extends UserRepository[F]
     with Schema {
-
   import ctx._
   implicit val userUpdateMeta: UpdateMeta[User] = updateMeta[User](_.userId)
 //  implicit val userInsertMeta: InsertMeta[User] = insertMeta[User](_.userId)

@@ -20,7 +20,6 @@ class UserServiceEndpoint[F[_]: Sync: Logger, A](
   userService: UserService[F],
   hasher: PasswordHasher[F, A]
 ) extends Http4sDsl[F] {
-
   private val userCreateService = HttpRoutes.of[F] {
     case req @ POST -> Root =>
       for {
@@ -53,7 +52,6 @@ class UserServiceEndpoint[F[_]: Sync: Logger, A](
   }
 
   private val loginService: HttpRoutes[F] = HttpRoutes.of[F] {
-
     case req @ POST -> Root / "login" =>
       val res: F[Response[F]] = for {
         userCredential <- req.as[UserCredential]
@@ -77,7 +75,6 @@ class UserServiceEndpoint[F[_]: Sync: Logger, A](
 
   val publicService: HttpRoutes[F]   = loginService <+> userCreateService
   val privateService: AuthService[F] = uService
-
 }
 
 object UserServiceEndpoint {

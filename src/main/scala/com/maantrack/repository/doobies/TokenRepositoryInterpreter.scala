@@ -47,7 +47,6 @@ object BearerSQL {
 }
 
 class TokenRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends TokenRepository[F] {
-
   import BearerSQL._
 
   override def addToken(bearerToken: BearerToken): F[BearerToken] =
@@ -64,7 +63,6 @@ class TokenRepositoryInterpreter[F[_]: Sync: Logger](xa: Transactor[F]) extends 
   override def getTokenById(
     secureRandomId: SecureRandomId
   ): OptionT[F, BearerToken] = OptionT(byId(secureRandomId).option.transact(xa))
-
 }
 
 object TokenRepositoryInterpreter {

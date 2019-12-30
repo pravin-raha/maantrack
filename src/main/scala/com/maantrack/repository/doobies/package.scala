@@ -7,7 +7,6 @@ import doobie.util.Meta
 import tsec.common.SecureRandomId
 
 package object doobies {
-
   val UNIQUE_VIOLATION: SqlState =
     doobie.postgres.sqlstate.class23.UNIQUE_VIOLATION
 

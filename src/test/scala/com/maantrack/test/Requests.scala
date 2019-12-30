@@ -16,7 +16,6 @@ import org.http4s.{ EntityDecoder, HttpApp, Uri }
 import tsec.passwordhashers.jca.BCrypt
 
 class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] with Http4sClientDsl[IO] {
-
   private lazy val routes: HttpApp[IO] = Router(
     "/user"  -> module.userEndpoint,
     "/board" -> module.boardServiceEndpoint,
@@ -72,5 +71,4 @@ class Requests(private val module: Module[IO, BCrypt]) extends Http4sDsl[IO] wit
       postResponse    <- routes.run(postRequestAuth)
       getCardId       <- postResponse.as[Long]
     } yield getCardId
-
 }

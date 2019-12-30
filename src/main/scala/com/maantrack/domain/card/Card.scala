@@ -40,7 +40,6 @@ case class CardRequest(
       .withFieldConst(_.createdDate, Instant.now())
       .withFieldConst(_.modifiedDate, Instant.now())
       .transform
-
 }
 
 object Card {

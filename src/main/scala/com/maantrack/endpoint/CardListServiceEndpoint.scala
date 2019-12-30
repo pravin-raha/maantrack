@@ -15,7 +15,6 @@ class CardListServiceEndpoint[F[_]: Sync](
   cardListService: CardListService[F],
   Auth: SecuredRequestHandler[F, Long, User, TSecBearerToken[Long]]
 ) extends Http4sDsl[F] {
-
   private val authService: AuthService[F] = TSecAuthService {
     case req @ POST -> Root asAuthed _ =>
       for {

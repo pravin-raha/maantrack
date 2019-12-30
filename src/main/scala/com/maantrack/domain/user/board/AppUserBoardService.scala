@@ -4,7 +4,6 @@ import cats.data.OptionT
 import cats.effect.Async
 
 class AppUserBoardService[F[_]: Async](userBoardRepository: AppUserBoardRepository[F]) {
-
   def getById(id: Long): OptionT[F, AppUserBoard] = userBoardRepository.getById(id)
 
   def add(boardRequest: AppUserBoard): F[Unit] = userBoardRepository.add(boardRequest)

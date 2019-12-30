@@ -37,7 +37,6 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
   xa: Transactor[F],
   hasher: PasswordHasher[F, A]
 ) {
-
   private lazy val ctx: Postgres[SnakeCase] with Decoders with Encoders =
     new DoobieContext.Postgres[SnakeCase](SnakeCase) with Decoders with Encoders
 
@@ -93,5 +92,4 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect, A](
 
   val userEndpoint: HttpRoutes[F] = helloEndpoint.publicService <+> Auth
     .liftService(helloEndpoint.privateService)
-
 }

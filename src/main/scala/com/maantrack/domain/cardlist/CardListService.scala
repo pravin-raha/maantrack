@@ -3,7 +3,6 @@ import cats.data.OptionT
 import cats.effect.Async
 
 class CardListService[F[_]: Async](cardListRepository: CardListRepository[F]) {
-
   def getById(id: Long): OptionT[F, CardList] = cardListRepository.getById(id)
 
   def add(listRequest: CardListRequest): F[Long] = cardListRepository.add(listRequest)

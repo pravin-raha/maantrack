@@ -14,7 +14,6 @@ import tsec.authentication._
 class BoardServiceEndpoint[F[_]: Sync](
   boardService: BoardService[F]
 ) extends Http4sDsl[F] {
-
   private val boardCreateService: AuthService[F] = TSecAuthService {
     case req @ POST -> Root asAuthed user =>
       val res: F[Response[F]] = for {
@@ -45,7 +44,6 @@ class BoardServiceEndpoint[F[_]: Sync](
   }
 
   val privateService: AuthService[F] = boardCreateService
-
 }
 
 object BoardServiceEndpoint {

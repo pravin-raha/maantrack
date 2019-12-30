@@ -41,7 +41,6 @@ case class BoardRequest(
 object BoardRequest {
   implicit def boardRequestDecoder[F[_]: Sync]: EntityDecoder[F, BoardRequest] = jsonOf
   implicit def boardRequestEncoder[F[_]: Sync]: EntityEncoder[F, BoardRequest] = jsonEncoderOf
-
 }
 
 object Board {

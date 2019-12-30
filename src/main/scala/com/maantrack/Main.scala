@@ -17,7 +17,6 @@ import tsec.passwordhashers.jca.BCrypt
 import pureconfig.generic.auto._
 
 object Main extends IOApp {
-
   implicit val unsafeLogger: SelfAwareStructuredLogger[IO] =
     Slf4jLogger.getLogger[IO]
 
@@ -26,7 +25,6 @@ object Main extends IOApp {
 }
 
 object HttpServer {
-
   def stream[F[_]: ConcurrentEffect: ContextShift: Timer: Logger, A]: Resource[F, H4Server[F]] =
     for {
       serverConfig <- Resource.liftF(
@@ -62,5 +60,4 @@ object HttpServer {
       "/card"  -> ctx.cardEndpoint
     ).orNotFound
   }
-
 }

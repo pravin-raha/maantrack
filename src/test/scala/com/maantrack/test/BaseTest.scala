@@ -13,5 +13,4 @@ trait BaseTest extends AnyFlatSpec with Matchers {
     Slf4jLogger.getLogger[IO]
 
   val hasher: PasswordHasher[IO, BCrypt] = BCrypt.syncPasswordHasher[IO]
-
 }

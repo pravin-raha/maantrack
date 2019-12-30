@@ -22,7 +22,6 @@ import tsec.passwordhashers.jca.BCrypt
 import scala.concurrent.ExecutionContext
 
 class CardTest extends BaseTest with TestEmbeddedPostgres with Eventually with Http4sClientDsl[IO] with Http4sDsl[IO] {
-
   implicit var contextShift: ContextShift[IO] = _
   private var module: Module[IO, BCrypt]      = _
 
@@ -121,5 +120,4 @@ class CardTest extends BaseTest with TestEmbeddedPostgres with Eventually with H
       )
       cardId <- request.createAndGetCard(authorization, cardReq)
     } yield (authorization, cardId, cardReq)
-
 }

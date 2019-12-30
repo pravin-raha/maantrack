@@ -4,7 +4,6 @@ import cats.data.OptionT
 import cats.effect.Async
 
 class UserService[F[_]: Async](userRepository: UserRepository[F]) {
-
   def addUser(userRequest: UserRequest): F[User] =
     userRepository.addUser(userRequest)
 

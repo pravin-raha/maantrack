@@ -15,7 +15,6 @@ import doobie.{ Fragments, Update0 }
 import io.chrisdavenport.log4cats.Logger
 
 object OrganizationSQL {
-
   import Fragments.whereAnd
 
   def byId(id: Long): doobie.ConnectionIO[Option[Organization]] =

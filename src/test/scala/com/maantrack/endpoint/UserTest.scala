@@ -24,7 +24,6 @@ class UserTest
     with Http4sClientDsl[IO]
     with Http4sDsl[IO]
     with ScalaCheckPropertyChecks {
-
   implicit var contextShift: ContextShift[IO] = _
   var module: Module[IO, BCrypt]              = _
 
@@ -77,5 +76,4 @@ class UserTest
       createdUser.userName shouldEqual getUser.userName
     }).unsafeRunSync
   }
-
 }

@@ -23,5 +23,4 @@ trait Schema {
       _.userId            -> "app_user_id"
     )
   }
-
 }

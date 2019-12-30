@@ -2,7 +2,6 @@ package com.maantrack.domain.card
 import cats.data.OptionT
 
 trait CardRepository[F[_]] {
-
   def add(cardRequest: CardRequest): F[Long]
 
   def getById(id: Long): OptionT[F, Card]

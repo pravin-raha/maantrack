@@ -36,5 +36,4 @@ class BoardRepositoryInterpreter[F[_]: Sync: Logger](
 
   override def update(board: Board): F[Long] =
     run(query[Board].filter(_.boardId == lift(board.boardId)).update(lift(board))).transact(xa).as(board.boardId)
-
 }

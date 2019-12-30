@@ -6,7 +6,6 @@ import com.maantrack.auth.BearerToken
 import tsec.common.SecureRandomId
 
 class TokenService[F[_]: Async](tokenRepository: TokenRepository[F]) {
-
   def addToken(bearerToken: BearerToken): F[BearerToken] =
     tokenRepository.addToken(bearerToken)
 

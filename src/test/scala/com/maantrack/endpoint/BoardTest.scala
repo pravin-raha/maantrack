@@ -19,7 +19,6 @@ import tsec.passwordhashers.jca.BCrypt
 import scala.concurrent.ExecutionContext
 
 class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with Http4sClientDsl[IO] with Http4sDsl[IO] {
-
   implicit var contextShift: ContextShift[IO] = _
   var module: Module[IO, BCrypt]              = _
 
