@@ -11,9 +11,7 @@ package object doobies {
     doobie.postgres.sqlstate.class23.UNIQUE_VIOLATION
 
   implicit val secureRandomIdMeta: Meta[SecureRandomId] =
-    Meta[Array[Byte]].imap(
-      x => SecureRandomId.apply(new String(x))
-    )(
+    Meta[Array[Byte]].imap(x => SecureRandomId.apply(new String(x)))(
       _.getBytes
     )
 
