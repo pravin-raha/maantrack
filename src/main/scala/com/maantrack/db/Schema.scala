@@ -36,3 +36,12 @@ object Test extends App {
   val decode = Jwt.decode(token).toOption
   println(decode)
 }
+
+object Test extends App {
+  implicit val clock: Clock = Clock.systemUTC
+  private val token: String = Jwt.encode(JwtClaim({
+    """{"user":1}"""
+  }).issuedNow.expiresIn(10), "secretKey", JwtAlgorithm.HS512)
+  val decode = Jwt.decode(token).toOption
+  println(decode)
+}
