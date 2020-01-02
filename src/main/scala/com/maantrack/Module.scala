@@ -43,28 +43,25 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect](
 
   case class AuthUser(id: Long, name: String)
 
-  val authUser: Kleisli[F, Request[F], Either[String, User]] = Kleisli(
-    req => {
-      val maybeToken: Option[String] = req.headers.get(Authorization).collect {
-        case Authorization(Token(AuthScheme.Bearer, token)) => token
-      }
-      maybeToken
-        .fold("Bearer token not found".asLeft[User].pure[F]) { token =>
-          Jwt
-            .decode(token, "53cr3t", JwtAlgorithm.allHmac())
-            .toEither
-            .fold(_ => "Invalid access token".asLeft, _.asRight)
-            .map(
-              c =>
-                decode[UserRequest](c.content)
-                  .map(_.toUser)
-                  .fold(_ => "Token parsing error".asLeft, _.asRight)
-            )
-            .flatten
-            .pure[F]
-        }
+  val authUser: Kleisli[F, Request[F], Either[String, User]] = Kleisli(req => {
+    val maybeToken: Option[String] = req.headers.get(Authorization).collect {
+      case Authorization(Token(AuthScheme.Bearer, token)) => token
     }
-  )
+    maybeToken
+      .fold("Bearer token not found".asLeft[User].pure[F]) { token =>
+        Jwt
+          .decode(token, "53cr3t", JwtAlgorithm.allHmac())
+          .toEither
+          .fold(_ => "Invalid access token".asLeft, _.asRight)
+          .map(c =>
+            decode[UserRequest](c.content)
+              .map(_.toUser)
+              .fold(_ => "Token parsing error".asLeft, _.asRight)
+          )
+          .flatten
+          .pure[F]
+      }
+  })
 
   val onFailure: AuthedRoutes[String, F] = Kleisli(req => OptionT.liftF(Forbidden(req.context)))
 

@@ -4,7 +4,6 @@ import java.time.Instant
 
 import doobie.enum.SqlState
 import doobie.util.meta.Meta
-import tsec.common.SecureRandomId
 import doobie.implicits.javasql._
 
 package object doobies {
