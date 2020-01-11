@@ -79,20 +79,20 @@ create table app_user_board(
    foreign key (board_id) references board(board_id) on delete cascade on update cascade
 );
 
-insert into app_user (
-    app_user_id ,
-    avatar_url ,
-    avatar_source ,
-    bio ,
-    confirmed ,
-    email ,
-    first_name ,
-    last_name ,
-    user_type ,
-    profile_url ,
-    password ,
-    birth_date ,
-    user_name ,
-    created_date ,
-    modified_date
-) values (1, 'url', 'source', 'bio', true, 'email','first_name', 'last_name', 'User', 'profile_url','password', now(),'admin',now(), now());
+--insert into app_user (
+--    app_user_id ,
+--    avatar_url ,
+--    avatar_source ,
+--    bio ,
+--    confirmed ,
+--    email ,
+--    first_name ,
+--    last_name ,
+--    user_type ,
+--    profile_url ,
+--    password ,
+--    birth_date ,
+--    user_name ,
+--    created_date ,
+--    modified_date
+--) values (1, 'url', 'source', 'bio', true, 'email','first_name', 'last_name', 'User', 'profile_url','password', now(),'admin',now(), now());
