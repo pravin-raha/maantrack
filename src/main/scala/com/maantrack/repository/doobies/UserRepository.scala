@@ -12,5 +12,7 @@ trait UserRepository[F[_]] {
 
   def deleteUserById(userId: Long): OptionT[F, User]
 
-  def getUserByUserName(userName: String): OptionT[F, User]
+  def getUserByUserName(username: String): OptionT[F, User]
+
+  def findUserByUsernameAndPassword(username: String, password: String): OptionT[F, User]
 }

@@ -14,20 +14,17 @@ class AuthService[F[_]: Sync: Logger](userService: UserService[F]) {
 
   def login(username: String, password: String): F[JwtToken] =
     userService
-      .getUserByUserName(username)
+      .findUserByUsernameAndPassword(username, password)
       .value
       .flatMap {
         case Some(user) =>
-          if (user.password == password)
-            JwtToken(
-              Jwt.encode(
-                user.asJson.toString(),
-                "53cr3t",
-                JwtAlgorithm.HS256
-              )
-            ).pure[F]
-          else InvalidUserOrPassword(username).raiseError[F, JwtToken]
-
+          JwtToken(
+            Jwt.encode(
+              user.asJson.toString(),
+              "53cr3t",
+              JwtAlgorithm.HS256
+            )
+          ).pure[F]
         case None => InvalidUserOrPassword(username).raiseError[F, JwtToken]
       }
 

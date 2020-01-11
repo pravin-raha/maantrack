@@ -19,7 +19,7 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
     with Schema {
   import ctx._
   implicit val userUpdateMeta: UpdateMeta[User] = updateMeta[User](_.userId)
-//  implicit val userInsertMeta: InsertMeta[User] = insertMeta[User](_.userId)
+  //  implicit val userInsertMeta: InsertMeta[User] = insertMeta[User](_.userId)
 
   private def selectUserById(id: Long): Quoted[EntityQuery[User]] = quote {
     userSchema.filter(_.userId == lift(id))
@@ -27,6 +27,12 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
 
   private def selectUserByUserName(userName: String): Quoted[EntityQuery[User]] = quote {
     userSchema.filter(_.userName == lift(userName))
+  }
+
+  private def selectUserByUsernameAndPassword(username: String, password: String): Quoted[EntityQuery[User]] = quote {
+    userSchema
+      .filter(_.userName == lift(username))
+      .filter(_.password == lift(password))
   }
 
   override def addUser(userRequest: UserRequest): F[User] =
@@ -48,6 +54,9 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
 
   override def getUserByUserName(userName: String): OptionT[F, User] =
     OptionT(run(selectUserByUserName(userName)).transact(xa).map(_.headOption))
+
+  override def findUserByUsernameAndPassword(username: String, password: String): OptionT[F, User] =
+    OptionT(run(selectUserByUsernameAndPassword(username, password)).transact(xa).map(_.headOption))
 }
 
 object UserRepositoryInterpreter {
