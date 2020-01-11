@@ -1,7 +1,9 @@
-package com.maantrack.domain.user
+package com.maantrack.service
 
 import cats.data.OptionT
 import cats.effect.Async
+import com.maantrack.domain.{ User, UserRequest }
+import com.maantrack.repository.doobies.UserRepository
 
 class UserService[F[_]: Async](userRepository: UserRepository[F]) {
   def addUser(userRequest: UserRequest): F[User] =

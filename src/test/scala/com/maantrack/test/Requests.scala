@@ -2,9 +2,9 @@
 //
 //import cats.effect.{ IO, Sync }
 //import com.maantrack.Module
-//import com.maantrack.domain.board.BoardRequest
-//import com.maantrack.domain.card.CardRequest
-//import com.maantrack.domain.cardlist.CardListRequest
+//import com.maantrack.domain.BoardRequest
+//import com.maantrack.domain.CardRequest
+//import com.maantrack.domain.CardListRequest
 //import com.maantrack.domain.user.{ UserCredential, UserRequest, UserResponse }
 //import org.http4s.circe.jsonOf
 //import org.http4s.client.dsl.Http4sClientDsl

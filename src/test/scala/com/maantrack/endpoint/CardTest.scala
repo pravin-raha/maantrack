@@ -4,9 +4,9 @@
 //
 //import cats.effect.{ ContextShift, IO }
 //import com.maantrack.Module
-//import com.maantrack.domain.board.BoardRequest
+//import com.maantrack.domain.BoardRequest
 //import com.maantrack.domain.card.{ Card, CardRequest }
-//import com.maantrack.domain.cardlist.CardListRequest
+//import com.maantrack.domain.CardListRequest
 //import com.maantrack.domain.user.{ Role, UserRequest }
 //import com.maantrack.test.{ BaseTest, Requests, TestEmbeddedPostgres }
 //import org.http4s.circe.CirceEntityCodec._

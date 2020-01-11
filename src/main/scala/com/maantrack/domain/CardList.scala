@@ -1,4 +1,5 @@
-package com.maantrack.domain.cardlist
+package com.maantrack.domain
+
 import java.time.Instant
 
 import cats.effect.Sync

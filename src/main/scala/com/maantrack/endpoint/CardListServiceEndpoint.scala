@@ -2,8 +2,8 @@ package com.maantrack.endpoint
 
 import cats.effect.Sync
 import cats.implicits._
-import com.maantrack.domain.cardlist.{ CardListRequest, CardListService }
-import com.maantrack.domain.user.User
+import com.maantrack.domain.{ CardListRequest, User }
+import com.maantrack.service.CardListService
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.AuthedRoutes

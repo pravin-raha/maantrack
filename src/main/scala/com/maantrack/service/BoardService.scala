@@ -1,7 +1,9 @@
-package com.maantrack.domain.board
+package com.maantrack.service
 
 import cats.data.OptionT
 import cats.effect.Async
+import com.maantrack.domain.{ Board, BoardRequest }
+import com.maantrack.repository.doobies.BoardRepository
 
 class BoardService[F[_]: Async](boardRepository: BoardRepository[F]) {
   def getById(id: Long): OptionT[F, Board] = boardRepository.getById(id)

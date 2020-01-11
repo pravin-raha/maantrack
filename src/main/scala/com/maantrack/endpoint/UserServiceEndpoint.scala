@@ -4,8 +4,8 @@ import java.time.Instant
 
 import cats.effect._
 import cats.implicits._
-import com.maantrack.domain.Error
-import com.maantrack.domain.user._
+import com.maantrack.domain.{ Error, Role, User, UserRequest, UserResponse }
+import com.maantrack.service.UserService
 import io.chrisdavenport.log4cats.Logger
 import io.circe.generic.auto._
 import io.circe.syntax._

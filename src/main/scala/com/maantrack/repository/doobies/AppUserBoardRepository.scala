@@ -1,6 +1,7 @@
-package com.maantrack.domain.user.board
+package com.maantrack.repository.doobies
 
 import cats.data.OptionT
+import com.maantrack.domain.AppUserBoard
 
 trait AppUserBoardRepository[F[_]] {
   def add(userBoard: AppUserBoard): F[Unit]

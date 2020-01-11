@@ -1,5 +1,7 @@
-package com.maantrack.domain.board
+package com.maantrack.repository.doobies
+
 import cats.data.OptionT
+import com.maantrack.domain.{ Board, BoardRequest }
 
 trait BoardRepository[F[_]] {
   def add(userId: Long, boardRequest: BoardRequest): F[Long]

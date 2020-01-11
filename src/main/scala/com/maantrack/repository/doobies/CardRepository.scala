@@ -1,5 +1,7 @@
-package com.maantrack.domain.card
+package com.maantrack.repository.doobies
+
 import cats.data.OptionT
+import com.maantrack.domain.{ Card, CardRequest }
 
 trait CardRepository[F[_]] {
   def add(cardRequest: CardRequest): F[Long]

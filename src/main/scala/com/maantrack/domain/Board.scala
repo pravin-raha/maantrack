@@ -1,4 +1,5 @@
-package com.maantrack.domain.board
+package com.maantrack.domain
+
 import java.time.Instant
 
 import cats.effect.Sync

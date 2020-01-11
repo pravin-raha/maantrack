@@ -4,7 +4,7 @@
 //
 //import cats.effect.{ ContextShift, IO }
 //import com.maantrack.Module
-//import com.maantrack.domain.board.BoardRequest
+//import com.maantrack.domain.BoardRequest
 //import com.maantrack.domain.cardlist.{ CardList, CardListRequest }
 //import com.maantrack.domain.user.{ Role, UserRequest }
 //import com.maantrack.test.{ BaseTest, Requests, TestEmbeddedPostgres }

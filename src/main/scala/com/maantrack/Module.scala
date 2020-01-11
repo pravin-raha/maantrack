@@ -4,22 +4,20 @@ import cats.data.{ Kleisli, OptionT }
 import cats.effect.{ ConcurrentEffect, Sync }
 import cats.implicits._
 import com.maantrack.db.{ Decoders, Encoders }
-import com.maantrack.domain.board.BoardService
-import com.maantrack.domain.card.CardService
-import com.maantrack.domain.cardlist.CardListService
-import com.maantrack.domain.user.{ User, UserRequest, UserService }
+import com.maantrack.domain.{ User, UserRequest }
 import com.maantrack.endpoint.{
   BoardServiceEndpoint,
   CardListServiceEndpoint,
   CardServiceEndpoint,
   UserServiceEndpoint
 }
-import com.maantrack.repository.doobies.{
+import com.maantrack.repository.doobies.interpreter.{
   BoardRepositoryInterpreter,
   CardListRepositoryInterpreter,
   CardRepositoryInterpreter,
   UserRepositoryInterpreter
 }
+import com.maantrack.service.{ BoardService, CardListService, CardService, UserService }
 import doobie.quill.DoobieContext
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor

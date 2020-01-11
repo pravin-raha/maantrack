@@ -1,4 +1,4 @@
-package com.maantrack.domain.user
+package com.maantrack.domain
 
 import java.time.Instant
 

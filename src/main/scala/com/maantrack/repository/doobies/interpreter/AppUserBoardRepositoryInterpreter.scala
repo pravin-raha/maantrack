@@ -1,9 +1,10 @@
-package com.maantrack.repository.doobies
+package com.maantrack.repository.doobies.interpreter
 
 import cats.data.OptionT
 import cats.effect.Sync
 import cats.implicits._
-import com.maantrack.domain.user.board.{ AppUserBoard, AppUserBoardRepository }
+import com.maantrack.domain.AppUserBoard
+import com.maantrack.repository.doobies.AppUserBoardRepository
 import com.maantrack.repository.doobies.Doobie._
 import doobie.Fragments
 import doobie.implicits._

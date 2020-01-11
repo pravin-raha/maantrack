@@ -1,6 +1,9 @@
-package com.maantrack.domain.card
+package com.maantrack.service
+
 import cats.data.OptionT
 import cats.effect.Async
+import com.maantrack.domain.{ Card, CardRequest }
+import com.maantrack.repository.doobies.CardRepository
 
 class CardService[F[_]: Async](cardRepository: CardRepository[F]) {
   def getById(id: Long): OptionT[F, Card] = cardRepository.getById(id)

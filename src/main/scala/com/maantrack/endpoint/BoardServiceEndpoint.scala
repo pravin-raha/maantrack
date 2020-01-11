@@ -2,8 +2,8 @@ package com.maantrack.endpoint
 
 import cats.effect._
 import cats.implicits._
-import com.maantrack.domain.board.{ BoardRequest, BoardService }
-import com.maantrack.domain.user.User
+import com.maantrack.domain.{ BoardRequest, User }
+import com.maantrack.service.BoardService
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.circe.generic.auto._
 import io.circe.syntax._

@@ -1,10 +1,11 @@
-package com.maantrack.repository.doobies
+package com.maantrack.repository.doobies.interpreter
 
 import cats.data.OptionT
 import cats.effect.Sync
 import cats.implicits._
 import com.maantrack.db.{ Decoders, Encoders, Schema }
-import com.maantrack.domain.card.{ Card, CardRepository, CardRequest }
+import com.maantrack.domain.{ Card, CardRequest }
+import com.maantrack.repository.doobies.CardRepository
 import doobie.implicits._
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor

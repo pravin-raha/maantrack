@@ -1,3 +1,3 @@
-package com.maantrack.domain.user.board
+package com.maantrack.domain
 
 case class AppUserBoard(appUserId: Long, boardId: Long)

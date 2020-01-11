@@ -1,6 +1,7 @@
-package com.maantrack.domain.user
+package com.maantrack.repository.doobies
 
 import cats.data.OptionT
+import com.maantrack.domain.{ User, UserRequest }
 
 trait UserRepository[F[_]] {
   def addUser(userRequest: UserRequest): F[User]
