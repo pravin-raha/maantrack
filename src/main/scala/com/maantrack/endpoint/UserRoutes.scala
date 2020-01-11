@@ -13,7 +13,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.server.{ AuthMiddleware, Router }
 import org.http4s.{ AuthedRoutes, HttpRoutes }
 
-class UserServiceEndpoint[F[_]: Sync: Logger](
+class UserRoutes[F[_]: Sync: Logger](
   userService: UserService[F]
 ) extends Http4sDsl[F] {
 
@@ -57,13 +57,13 @@ class UserServiceEndpoint[F[_]: Sync: Logger](
 
 }
 
-object UserServiceEndpoint {
+object UserRoutes {
   def apply[F[_]: Sync: Logger](
     userService: UserService[F]
   )(
     implicit F: ConcurrentEffect[F]
-  ): UserServiceEndpoint[F] =
-    new UserServiceEndpoint(
+  ): UserRoutes[F] =
+    new UserRoutes(
       userService
     )
 }

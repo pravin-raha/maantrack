@@ -10,7 +10,7 @@ import org.http4s.server.Router
 import org.http4s.{ HttpRoutes, StaticFile }
 import org.webjars.WebJarAssetLocator
 
-class SwaggerUIServiceEndpoint[F[_]: Sync](blocker: Blocker)(implicit cf: ConcurrentEffect[F], cs: ContextShift[F])
+class SwaggerUIRoutes[F[_]: Sync](blocker: Blocker)(implicit cf: ConcurrentEffect[F], cs: ContextShift[F])
     extends Http4sDsl[F] {
   private val swaggerUiPath = Path("swagger-ui")
 
@@ -49,9 +49,9 @@ class SwaggerUIServiceEndpoint[F[_]: Sync](blocker: Blocker)(implicit cf: Concur
   )
 }
 
-object SwaggerUIServiceEndpoint {
+object SwaggerUIRoutes {
   def apply[F[_]: Sync](
     blocker: Blocker
-  )(implicit cf: ConcurrentEffect[F], cs: ContextShift[F]): SwaggerUIServiceEndpoint[F] =
-    new SwaggerUIServiceEndpoint(blocker)
+  )(implicit cf: ConcurrentEffect[F], cs: ContextShift[F]): SwaggerUIRoutes[F] =
+    new SwaggerUIRoutes(blocker)
 }

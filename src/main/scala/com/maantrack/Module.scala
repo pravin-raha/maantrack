@@ -6,7 +6,7 @@ import cats.implicits._
 import com.maantrack.db.{ Decoders, Encoders }
 import com.maantrack.domain.User
 import com.maantrack.endpoint._
-import com.maantrack.endpoint.auth.LoginEndpoint
+import com.maantrack.endpoint.auth.LoginRoutes
 import com.maantrack.repository.doobies.interpreter.{
   BoardRepositoryInterpreter,
   CardListRepositoryInterpreter,
@@ -67,24 +67,24 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect: Timer: ContextShift](
 
   private val userRepoInterpreter: UserRepositoryInterpreter[F] = UserRepositoryInterpreter(xa = xa, ctx)
   private val userService: UserService[F]                       = UserService(userRepoInterpreter)
-  private val userRoute: HttpRoutes[F]                          = UserServiceEndpoint[F](userService).routes(authMiddleware)
+  private val userRoute: HttpRoutes[F]                          = UserRoutes[F](userService).routes(authMiddleware)
 
   private val boardRepository: BoardRepositoryInterpreter[F] = new BoardRepositoryInterpreter[F](xa, ctx)
   private val boardService: BoardService[F]                  = new BoardService[F](boardRepository)
-  private val boardServiceEndpoint: HttpRoutes[F]            = new BoardServiceEndpoint[F](boardService).routes(authMiddleware)
+  private val boardServiceEndpoint: HttpRoutes[F]            = new BoardRoutes[F](boardService).routes(authMiddleware)
 
   private val listRepository: CardListRepositoryInterpreter[F] = new CardListRepositoryInterpreter[F](xa, ctx)
   private val listService: CardListService[F]                  = new CardListService[F](listRepository)
-  private val listEndpoint: HttpRoutes[F]                      = new CardListServiceEndpoint[F](listService).routes(authMiddleware)
+  private val listEndpoint: HttpRoutes[F]                      = new CardListRoutes[F](listService).routes(authMiddleware)
 
   private val cardRepository: CardRepositoryInterpreter[F] = new CardRepositoryInterpreter[F](xa, ctx)
   private val cardService: CardService[F]                  = new CardService[F](cardRepository)
-  private val cardEndpoint: HttpRoutes[F]                  = new CardServiceEndpoint[F](cardService).routes(authMiddleware)
+  private val cardEndpoint: HttpRoutes[F]                  = new CardRoutes[F](cardService).routes(authMiddleware)
 
   private val authService: AuthService[F]  = new AuthService[F](userService)
-  private val loginEndpoint: HttpRoutes[F] = new LoginEndpoint[F](authService).routes
+  private val loginEndpoint: HttpRoutes[F] = new LoginRoutes[F](authService).routes
 
-  private val swaggerRoute = SwaggerUIServiceEndpoint(blocker).routes
+  private val swaggerRoute = SwaggerUIRoutes(blocker).routes
 
   private val routes = swaggerRoute <+> userRoute <+> loginEndpoint <+> boardServiceEndpoint <+> listEndpoint <+> cardEndpoint
 

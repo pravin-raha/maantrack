@@ -60,18 +60,17 @@ lazy val doobie = Seq(
 )
 
 lazy val http4s = Seq(
-  "org.http4s" %% "http4s-dsl"           % http4sVersion,
-  "org.http4s" %% "http4s-blaze-server"  % http4sVersion,
-  "org.http4s" %% "http4s-circe"         % http4sVersion,
-  "org.http4s" %% "http4s-blaze-client"  % http4sVersion % "test",
-  "io.circe"   %% "circe-generic"        % circeVersion,
-  "io.circe"   %% "circe-literal"        % circeVersion,
-  "io.circe"   %% "circe-generic-extras" % circeGenericExtrasVersion,
-  "io.circe"   %% "circe-parser"         % circeVersion,
-  "io.circe"   %% "circe-core"           % circeVersion,
-  "io.circe"   %% "circe-config"         % circeConfigVersion,
-//  "com.pauldijou"  %% "jwt-core"             % "4.2.0",
-  "dev.profunktor" %% "http4s-jwt-auth" % "0.0.3"
+  "org.http4s"     %% "http4s-dsl"           % http4sVersion,
+  "org.http4s"     %% "http4s-blaze-server"  % http4sVersion,
+  "org.http4s"     %% "http4s-circe"         % http4sVersion,
+  "org.http4s"     %% "http4s-blaze-client"  % http4sVersion % "test",
+  "io.circe"       %% "circe-generic"        % circeVersion,
+  "io.circe"       %% "circe-literal"        % circeVersion,
+  "io.circe"       %% "circe-generic-extras" % circeGenericExtrasVersion,
+  "io.circe"       %% "circe-parser"         % circeVersion,
+  "io.circe"       %% "circe-core"           % circeVersion,
+  "io.circe"       %% "circe-config"         % circeConfigVersion,
+  "dev.profunktor" %% "http4s-jwt-auth"      % "0.0.3"
 )
 
 lazy val common = Seq(

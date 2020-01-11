@@ -13,7 +13,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
 import org.http4s.{ EntityDecoder, EntityEncoder, HttpRoutes }
 
-class LoginEndpoint[F[_]: Sync: Logger](
+class LoginRoutes[F[_]: Sync: Logger](
   authService: AuthService[F]
 ) extends Http4sDsl[F] {
 

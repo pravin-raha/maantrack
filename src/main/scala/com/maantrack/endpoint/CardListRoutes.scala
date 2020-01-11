@@ -11,7 +11,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.server.{ AuthMiddleware, Router }
 import org.http4s.{ AuthedRoutes, HttpRoutes }
 
-class CardListServiceEndpoint[F[_]: Sync](
+class CardListRoutes[F[_]: Sync](
   cardListService: CardListService[F]
 ) extends Http4sDsl[F] {
 

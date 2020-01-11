@@ -11,7 +11,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.server.{ AuthMiddleware, Router }
 import org.http4s.{ AuthedRoutes, HttpRoutes }
 
-class BoardServiceEndpoint[F[_]: Sync](
+class BoardRoutes[F[_]: Sync](
   boardService: BoardService[F]
 ) extends Http4sDsl[F] {
 
@@ -43,8 +43,8 @@ class BoardServiceEndpoint[F[_]: Sync](
 
 }
 
-object BoardServiceEndpoint {
+object BoardRoutes {
   def apply[F[_]: Sync](
     boardService: BoardService[F]
-  )(implicit F: ConcurrentEffect[F]): BoardServiceEndpoint[F] = new BoardServiceEndpoint(boardService)
+  )(implicit F: ConcurrentEffect[F]): BoardRoutes[F] = new BoardRoutes(boardService)
 }
