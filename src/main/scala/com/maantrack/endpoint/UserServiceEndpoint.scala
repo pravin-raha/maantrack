@@ -1,10 +1,8 @@
 package com.maantrack.endpoint
 
-import java.time.Instant
-
 import cats.effect._
 import cats.implicits._
-import com.maantrack.domain.{ Error, Role, User, UserRequest, UserResponse }
+import com.maantrack.domain.{ User, UserRequest, UserResponse }
 import com.maantrack.service.UserService
 import io.chrisdavenport.log4cats.Logger
 import io.circe.generic.auto._
@@ -12,8 +10,7 @@ import io.circe.syntax._
 import io.scalaland.chimney.dsl._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{ AuthedRoutes, HttpRoutes, Response }
-import pdi.jwt.{ Jwt, JwtAlgorithm }
+import org.http4s.{ AuthedRoutes, HttpRoutes }
 
 class UserServiceEndpoint[F[_]: Sync: Logger](
   userService: UserService[F]
@@ -49,37 +46,7 @@ class UserServiceEndpoint[F[_]: Sync: Logger](
         }
   }
 
-  private val loginService: HttpRoutes[F] = HttpRoutes.of[F] {
-
-    case _ @POST -> Root / "login" =>
-      val res: F[Response[F]] = for {
-//        userCredential <- req.as[UserCredential]
-//        user <- userService
-//                 .getUserByUserName(userCredential.userName)
-//                 .toRight(Error.NotFound("Bad Credential"): Throwable)
-//                 .value
-//                 .flatMap(_.liftTo[F])
-//        hash   = PasswordHash[A](user.password)
-//        status <- hasher.checkpw(userCredential.password.getBytes, hash)
-        resp <- /*if (status == Verified) */ Ok()
-//               else Sync[F].raiseError[Response[F]](Error.BadLogin())
-        tok = Jwt.encode(
-          UserRequest("test@test.com", "fname", "lname", Role.Customer, "test", "test", Instant.now).asJson.toString(),
-          "53cr3t",
-          JwtAlgorithm.HS256
-        )
-      } yield {
-        print(tok)
-        resp.addCookie("token", tok)
-      }
-
-      res.recoverWith {
-        case n: Error.NotFound => NotFound(n.msg)
-        case e                 => Logger[F].error(e)(e.getMessage) *> BadRequest()
-      }
-  }
-
-  val publicService: HttpRoutes[F]          = loginService <+> userCreateService
+  val publicService: HttpRoutes[F]          = userCreateService
   val privateService: AuthedRoutes[User, F] = uService
 
 }

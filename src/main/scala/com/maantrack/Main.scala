@@ -52,12 +52,14 @@ object HttpServer {
     ctx: Module[F],
     blocker: Blocker
   ): HttpApp[F] = {
-    Router(
-      "/"      -> SwaggerUIServiceEndpoint(blocker).service,
-      "/user"  -> ctx.userEndpoint,
-      "/board" -> ctx.boardServiceEndpoint,
-      "/list"  -> ctx.listEndpoint,
-      "/card"  -> ctx.cardEndpoint
-    ).orNotFound
+    ctx.loggers(
+      Router(
+        "/"      -> SwaggerUIServiceEndpoint(blocker).service,
+        "/user"  -> ctx.userEndpoint,
+        "/board" -> ctx.boardServiceEndpoint,
+        "/list"  -> ctx.listEndpoint,
+        "/card"  -> ctx.cardEndpoint
+      ).orNotFound
+    )
   }
 }

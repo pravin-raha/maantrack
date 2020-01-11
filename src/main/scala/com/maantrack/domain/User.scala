@@ -9,6 +9,8 @@ import io.scalaland.chimney.dsl._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.{ EntityDecoder, EntityEncoder }
 
+import scala.util.control.NoStackTrace
+
 sealed case class Role(roleRepr: String) extends Embedded
 
 case class User(
@@ -68,6 +70,13 @@ case class UserResponse(
 
 case class UserCredential(userName: String, password: String)
 
+case class InvalidUserOrPassword(userName: String) extends NoStackTrace
+
+object InvalidUserOrPassword {
+  implicit def encoder[F[_]: Sync]: EntityEncoder[F, InvalidUserOrPassword] = jsonEncoderOf
+  implicit def decoder[F[_]: Sync]: EntityDecoder[F, InvalidUserOrPassword] = jsonOf
+}
+
 object Role {
   lazy val Customer: Role      = Role("User")
   lazy val Administrator: Role = Role("Administrator")
@@ -86,4 +95,9 @@ object UserRequest {
 object UserCredential {
   implicit def userCredentialEnc[F[_]: Sync]: EntityEncoder[F, UserCredential] = jsonEncoderOf
   implicit def userCredentialDec[F[_]: Sync]: EntityDecoder[F, UserCredential] = jsonOf
+}
+
+object User {
+  implicit def encoder[F[_]: Sync]: EntityEncoder[F, User] = jsonEncoderOf
+  implicit def decoder[F[_]: Sync]: EntityDecoder[F, User] = jsonOf
 }

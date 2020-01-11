@@ -4,7 +4,8 @@ import cats.data.{ Kleisli, OptionT }
 import cats.effect.{ ConcurrentEffect, Sync }
 import cats.implicits._
 import com.maantrack.db.{ Decoders, Encoders }
-import com.maantrack.domain.{ User, UserRequest }
+import com.maantrack.domain.User
+import com.maantrack.endpoint.auth.LoginEndpoint
 import com.maantrack.endpoint.{
   BoardServiceEndpoint,
   CardListServiceEndpoint,
@@ -17,20 +18,21 @@ import com.maantrack.repository.doobies.interpreter.{
   CardRepositoryInterpreter,
   UserRepositoryInterpreter
 }
-import com.maantrack.service.{ BoardService, CardListService, CardService, UserService }
+import com.maantrack.service._
 import doobie.quill.DoobieContext
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.Logger
+import io.circe.generic.auto._
+import io.circe.parser._
 import io.getquill.SnakeCase
 import org.http4s.Credentials.Token
-import org.http4s.{ AuthScheme, AuthedRoutes, HttpRoutes, Request }
-import org.http4s.server.AuthMiddleware
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers.Authorization
+import org.http4s.server.AuthMiddleware
+import org.http4s.server.middleware.{ RequestLogger, ResponseLogger }
+import org.http4s._
 import pdi.jwt.{ Jwt, JwtAlgorithm }
-import io.circe.parser._
-import io.circe.generic.auto._
 
 class Module[F[_]: Sync: Logger: ConcurrentEffect](
   xa: Transactor[F]
@@ -52,8 +54,7 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect](
           .toEither
           .fold(_ => "Invalid access token".asLeft, _.asRight)
           .map(c =>
-            decode[UserRequest](c.content)
-              .map(_.toUser)
+            decode[User](c.content)
               .fold(_ => "Token parsing error".asLeft, _.asRight)
           )
           .flatten
@@ -89,6 +90,19 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect](
   private lazy val cardService: CardService[F]                  = new CardService[F](cardRepository)
   val cardEndpoint: HttpRoutes[F]                               = authMiddleware(new CardServiceEndpoint[F](cardService).authService)
 
-  val userEndpoint: HttpRoutes[F] = helloEndpoint.publicService <+> authMiddleware(helloEndpoint.privateService)
+  private lazy val authService: AuthService[F] = new AuthService[F](userService)
+  val loginEndpoint: HttpRoutes[F]             = new LoginEndpoint[F](authService).publicService
+
+  val loggers: HttpApp[F] => HttpApp[F] = {
+    { http: HttpApp[F] =>
+      RequestLogger.httpApp(true, true)(http)
+    } andThen { http: HttpApp[F] =>
+      ResponseLogger.httpApp(true, true)(http)
+    }
+  }
+
+  val userEndpoint: HttpRoutes[F] = loginEndpoint <+> helloEndpoint.publicService <+> authMiddleware(
+    helloEndpoint.privateService
+  )
 
 }
