@@ -10,12 +10,16 @@ import io.circe.syntax._
 import io.scalaland.chimney.dsl._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.{ AuthMiddleware, Router }
 import org.http4s.{ AuthedRoutes, HttpRoutes }
 
 class UserServiceEndpoint[F[_]: Sync: Logger](
   userService: UserService[F]
 ) extends Http4sDsl[F] {
-  private val userCreateService = HttpRoutes.of[F] {
+
+  private val prefixPath = "/user"
+
+  private val userCreateRoutes = HttpRoutes.of[F] {
     case req @ POST -> Root =>
       for {
         userRequest <- req.as[UserRequest]
@@ -27,7 +31,7 @@ class UserServiceEndpoint[F[_]: Sync: Logger](
       } yield result
   }
 
-  private val uService: AuthedRoutes[User, F] = AuthedRoutes.of {
+  private val httpRoutes: AuthedRoutes[User, F] = AuthedRoutes.of {
     case GET -> Root / LongVar(userId) as _ =>
       userService
         .getUserById(userId)
@@ -46,8 +50,10 @@ class UserServiceEndpoint[F[_]: Sync: Logger](
         }
   }
 
-  val publicService: HttpRoutes[F]          = userCreateService
-  val privateService: AuthedRoutes[User, F] = uService
+  def routes(authMiddleware: AuthMiddleware[F, User]): HttpRoutes[F] = Router(
+    prefixPath -> authMiddleware(httpRoutes),
+    prefixPath -> userCreateRoutes
+  )
 
 }
 

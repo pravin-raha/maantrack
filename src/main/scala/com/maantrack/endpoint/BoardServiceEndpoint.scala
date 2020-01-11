@@ -4,33 +4,24 @@ import cats.effect._
 import cats.implicits._
 import com.maantrack.domain.{ BoardRequest, User }
 import com.maantrack.service.BoardService
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.http4s.{ AuthedRoutes, Response }
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.{ AuthMiddleware, Router }
+import org.http4s.{ AuthedRoutes, HttpRoutes }
 
 class BoardServiceEndpoint[F[_]: Sync](
   boardService: BoardService[F]
 ) extends Http4sDsl[F] {
 
-  private val boardCreateService: AuthedRoutes[User, F] = AuthedRoutes.of {
+  private val httpRoutes: AuthedRoutes[User, F] = AuthedRoutes.of {
     case req @ POST -> Root as user =>
-      val res: F[Response[F]] = for {
+      for {
         board  <- req.req.as[BoardRequest]
         id     <- boardService.add(user.userId, board)
         result <- Ok(id.asJson)
       } yield result
-
-      res.recoverWith {
-        case e =>
-          for {
-            logger <- Slf4jLogger.create[F]
-            _      <- logger.error(e)(e.getMessage)
-            b      <- BadRequest()
-          } yield b
-      }
 
     case GET -> Root / LongVar(boardId) as _ =>
       boardService.getById(boardId).value.flatMap {
@@ -44,12 +35,16 @@ class BoardServiceEndpoint[F[_]: Sync](
       }
   }
 
-  val privateService: AuthedRoutes[User, F] = boardCreateService
+  private val prefixPath = "/board"
+
+  def routes(authMiddleware: AuthMiddleware[F, User]): HttpRoutes[F] = Router(
+    prefixPath -> authMiddleware(httpRoutes)
+  )
 
 }
 
 object BoardServiceEndpoint {
-  def apply[F[_]: Async](
+  def apply[F[_]: Sync](
     boardService: BoardService[F]
   )(implicit F: ConcurrentEffect[F]): BoardServiceEndpoint[F] = new BoardServiceEndpoint(boardService)
 }

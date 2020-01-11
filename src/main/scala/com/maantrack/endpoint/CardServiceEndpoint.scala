@@ -6,15 +6,16 @@ import com.maantrack.domain.{ CardRequest, User }
 import com.maantrack.service.CardService
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.http4s.AuthedRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.{ AuthMiddleware, Router }
+import org.http4s.{ AuthedRoutes, HttpRoutes }
 
 class CardServiceEndpoint[F[_]: Sync](
   cardService: CardService[F]
 ) extends Http4sDsl[F] {
 
-  private val cardEndpoint: AuthedRoutes[User, F] = AuthedRoutes.of {
+  private val httpRoutes: AuthedRoutes[User, F] = AuthedRoutes.of {
     case req @ POST -> Root as _ =>
       for {
         cardReq <- req.req.as[CardRequest]
@@ -32,5 +33,9 @@ class CardServiceEndpoint[F[_]: Sync](
       cardService.deleteById(cardId).flatMap(cId => Ok(cId.asJson))
   }
 
-  val authService: AuthedRoutes[User, F] = cardEndpoint
+  private val prefixPath = "/card"
+
+  def routes(authMiddleware: AuthMiddleware[F, User]): HttpRoutes[F] = Router(
+    prefixPath -> authMiddleware(httpRoutes)
+  )
 }

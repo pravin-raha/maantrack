@@ -2,18 +2,19 @@ package com.maantrack.endpoint
 
 import cats.effect.{ Blocker, ConcurrentEffect, ContextShift, Sync }
 import io.circe.Json
-import org.http4s.dsl.Http4sDsl
-import org.http4s.{ HttpRoutes, StaticFile }
-import org.http4s.headers.Location
-import org.webjars.WebJarAssetLocator
-import org.http4s.implicits._
 import org.http4s.circe._
+import org.http4s.dsl.Http4sDsl
+import org.http4s.headers.Location
+import org.http4s.implicits._
+import org.http4s.server.Router
+import org.http4s.{ HttpRoutes, StaticFile }
+import org.webjars.WebJarAssetLocator
 
 class SwaggerUIServiceEndpoint[F[_]: Sync](blocker: Blocker)(implicit cf: ConcurrentEffect[F], cs: ContextShift[F])
     extends Http4sDsl[F] {
   private val swaggerUiPath = Path("swagger-ui")
 
-  val service: HttpRoutes[F] = HttpRoutes.of[F] {
+  private val httpRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
     case _ @GET -> `swaggerUiPath` / "config.json" =>
       //Entry point to Swagger UI
       Ok(Json.obj("url" -> Json.fromString(s"/swagger.yaml")))
@@ -40,6 +41,12 @@ class SwaggerUIServiceEndpoint[F[_]: Sync](blocker: Blocker)(implicit cf: Concur
       version
     }
   }
+
+  private val prefixPath = "/docs"
+
+  val routes: HttpRoutes[F] = Router(
+    prefixPath -> httpRoutes
+  )
 }
 
 object SwaggerUIServiceEndpoint {

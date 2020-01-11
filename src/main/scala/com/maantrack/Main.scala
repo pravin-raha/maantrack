@@ -4,14 +4,11 @@ import cats.Monad
 import cats.effect._
 import cats.implicits._
 import com.maantrack.config.{ DatabaseConfig, ServerConfig }
-import com.maantrack.endpoint.SwaggerUIServiceEndpoint
 import doobie.util.ExecutionContexts
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.chrisdavenport.log4cats.{ Logger, SelfAwareStructuredLogger }
-import org.http4s.HttpApp
 import org.http4s.server.blaze._
-import org.http4s.server.{ Router, Server => H4Server }
-import org.http4s.syntax.all._
+import org.http4s.server.{ Server => H4Server }
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 
@@ -40,26 +37,12 @@ object HttpServer {
                )
       blocker <- Blocker[F]
       xa      <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
-      ctx     = new Module(xa)
+      module  = new Module(xa, blocker)
       _       <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
       server <- BlazeServerBuilder[F]
                  .bindHttp(serverConfig.port, serverConfig.host)
-                 .withHttpApp(httpApp(ctx, blocker))
+                 .withHttpApp(module.httpApp)
                  .resource
     } yield server
 
-  def httpApp[F[_]: Sync: Logger: ConcurrentEffect: ContextShift](
-    ctx: Module[F],
-    blocker: Blocker
-  ): HttpApp[F] = {
-    ctx.loggers(
-      Router(
-        "/"      -> SwaggerUIServiceEndpoint(blocker).service,
-        "/user"  -> ctx.userEndpoint,
-        "/board" -> ctx.boardServiceEndpoint,
-        "/list"  -> ctx.listEndpoint,
-        "/card"  -> ctx.cardEndpoint
-      ).orNotFound
-    )
-  }
 }

@@ -10,6 +10,7 @@ import io.chrisdavenport.log4cats.Logger
 import io.circe.{ Decoder, Encoder }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.Router
 import org.http4s.{ EntityDecoder, EntityEncoder, HttpRoutes }
 
 class LoginEndpoint[F[_]: Sync: Logger](
@@ -36,5 +37,9 @@ class LoginEndpoint[F[_]: Sync: Logger](
 
   }
 
-  val publicService: HttpRoutes[F] = httpRoutes
+  private val prefixPath = "/auth"
+
+  val routes: HttpRoutes[F] = Router(
+    prefixPath -> httpRoutes
+  )
 }
