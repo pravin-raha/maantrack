@@ -34,10 +34,6 @@ class Requests(private val module: Module[IO]) extends Http4sDsl[IO] with Http4s
       loginResp  <- routes.run(loginRq)
       token      <- loginResp.as[JwtToken]
     } yield {
-      println("=====================================================")
-      println(s"Token :: $token")
-      println("=====================================================")
-
       (user, token)
     }
 

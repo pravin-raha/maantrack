@@ -7,9 +7,9 @@ lazy val commonSettings =
     dockerExposedPorts ++= Seq(8080),
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases",
-    sonarUseExternalConfig := false,
-    coverageEnabled := false,
-    coverageHighlighting := false
+    sonarUseExternalConfig := true,
+    coverageEnabled := true,
+    coverageHighlighting := true
   )
 
 lazy val maantrack = project

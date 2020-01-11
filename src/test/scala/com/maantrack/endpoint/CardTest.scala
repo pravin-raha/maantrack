@@ -2,7 +2,7 @@ package com.maantrack.endpoint
 
 import java.time.Instant
 
-import cats.effect.{ Blocker, ContextShift, IO, Timer }
+import cats.effect.{ Blocker, ContextShift, IO }
 import com.maantrack.Module
 import com.maantrack.domain._
 import com.maantrack.test.{ BaseTest, Requests, TestEmbeddedPostgres }
@@ -17,7 +17,6 @@ import org.scalatest.concurrent.Eventually
 import scala.concurrent.ExecutionContext
 
 class CardTest extends BaseTest with TestEmbeddedPostgres with Eventually with Http4sClientDsl[IO] with Http4sDsl[IO] {
-  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
   implicit var contextShift: ContextShift[IO] = _
   private var module: Module[IO]              = _
