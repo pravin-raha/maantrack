@@ -2,29 +2,25 @@ package com.maantrack.endpoint
 
 import java.time.Instant
 
-import cats.effect.{ ContextShift, IO }
+import cats.effect.{ Blocker, ContextShift, IO }
 import com.maantrack.Module
-import com.maantrack.domain.board.{ Board, BoardRequest }
-import com.maantrack.domain.user.{ Role, UserRequest }
+import com.maantrack.domain.{ Board, BoardRequest, Role, UserRequest }
 import com.maantrack.test.{ BaseTest, Requests, TestEmbeddedPostgres }
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.Http4sDsl
-import org.http4s.implicits._
-import org.http4s.server.Router
-import org.http4s.{ HttpApp, Uri }
+import org.http4s.headers.Authorization
+import org.http4s.{ AuthScheme, Credentials, HttpApp, Uri }
 import org.scalatest.concurrent.Eventually
-import tsec.passwordhashers.jca.BCrypt
 
 import scala.concurrent.ExecutionContext
 
 class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with Http4sClientDsl[IO] with Http4sDsl[IO] {
   implicit var contextShift: ContextShift[IO] = _
-  var module: Module[IO, BCrypt]              = _
+  var module: Module[IO]                      = _
 
-  private lazy val boardRoutes: HttpApp[IO] = {
-    Router(("/board", module.boardServiceEndpoint)).orNotFound
-  }
+  private lazy val boardRoutes: HttpApp[IO] = module.httpApp
+
   private lazy val request = new Requests(module)
 
   private val userRequest: UserRequest =
@@ -42,16 +38,16 @@ class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     contextShift = IO.contextShift(ExecutionContext.global)
-    module = new Module(currentDb.xa, hasher)
+    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global), jwtConfig)
   }
 
   "/board" should "create board" in {
     (for {
-      loginResp          <- request.signUpAndLogIn(userRequest)
-      (_, authorization) = loginResp
-      postRequest        <- POST(boardRequest, Uri.unsafeFromString(s"/board"))
-      postRequestAuth    = postRequest.putHeaders(authorization.get)
-      postResponse       <- boardRoutes.run(postRequestAuth)
+      loginResp       <- request.signUpAndLogIn(userRequest)
+      (_, token)      = loginResp
+      postRequest     <- POST(boardRequest, Uri.unsafeFromString(s"/board"))
+      postRequestAuth = postRequest.putHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value)))
+      postResponse    <- boardRoutes.run(postRequestAuth)
     } yield {
       postResponse.status shouldEqual Ok
     }).unsafeRunSync
@@ -59,13 +55,13 @@ class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with 
 
   "/board" should "get board by boardId" in {
     (for {
-      userRes            <- request.signUpAndLogIn(userRequest)
-      (_, authorization) = userRes
-      boardId            <- request.createAndGetBoard(authorization, boardRequest)
-      getRequest         <- GET(Uri.unsafeFromString(s"/board/$boardId"))
-      getRequestAuth     = getRequest.putHeaders(authorization.get)
-      getResponse        <- boardRoutes.run(getRequestAuth)
-      getBoard           <- getResponse.as[Board]
+      userRes        <- request.signUpAndLogIn(userRequest)
+      (_, token)     = userRes
+      boardId        <- request.createAndGetBoard(token, boardRequest)
+      getRequest     <- GET(Uri.unsafeFromString(s"/board/$boardId"))
+      getRequestAuth = getRequest.putHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value)))
+      getResponse    <- boardRoutes.run(getRequestAuth)
+      getBoard       <- getResponse.as[Board]
     } yield {
       getResponse.status shouldEqual Ok
       getBoard.name shouldEqual boardRequest.name
@@ -78,13 +74,13 @@ class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with 
 
   "/board" should "delete board by boardId" in {
     (for {
-      userRes            <- request.signUpAndLogIn(userRequest)
-      (_, authorization) = userRes
-      boardId            <- request.createAndGetBoard(authorization, boardRequest)
-      deleteRequest      <- DELETE(Uri.unsafeFromString(s"/board/$boardId"))
-      deleteRequestAuth  = deleteRequest.putHeaders(authorization.get)
-      deleteResponse     <- boardRoutes.run(deleteRequestAuth)
-      getBoard           <- deleteResponse.as[Long]
+      userRes           <- request.signUpAndLogIn(userRequest)
+      (_, token)        = userRes
+      boardId           <- request.createAndGetBoard(token, boardRequest)
+      deleteRequest     <- DELETE(Uri.unsafeFromString(s"/board/$boardId"))
+      deleteRequestAuth = deleteRequest.putHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token.value)))
+      deleteResponse    <- boardRoutes.run(deleteRequestAuth)
+      getBoard          <- deleteResponse.as[Long]
     } yield {
       deleteResponse.status shouldEqual Ok
       getBoard shouldEqual boardId

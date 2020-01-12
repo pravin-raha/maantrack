@@ -1,7 +1,6 @@
 package com.maantrack.db
 
-import com.maantrack.domain.cardlist.CardList
-import com.maantrack.domain.user.User
+import com.maantrack.domain.{ CardList, User }
 import doobie.quill.DoobieContext.Postgres
 import io.getquill.SnakeCase
 
