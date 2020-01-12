@@ -33,7 +33,7 @@ class CardTest extends BaseTest with TestEmbeddedPostgres with Eventually with H
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     contextShift = IO.contextShift(ExecutionContext.global)
-    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global))
+    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global), jwtConfig)
   }
 
   "/card" should "create card" in {

@@ -1,6 +1,7 @@
 package com.maantrack.test
 
 import cats.effect.{ IO, Timer }
+import com.maantrack.config.JwtConfig
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.scalatest.flatspec.AnyFlatSpec
@@ -13,4 +14,5 @@ trait BaseTest extends AnyFlatSpec with Matchers {
     Slf4jLogger.getLogger[IO]
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
+  val jwtConfig = JwtConfig("serect")
 }

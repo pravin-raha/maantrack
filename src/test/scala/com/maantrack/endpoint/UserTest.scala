@@ -35,7 +35,7 @@ class UserTest
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     contextShift = IO.contextShift(ExecutionContext.global)
-    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global))
+    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global), jwtConfig)
   }
 
   "/user/login" should "create user and log in" in {

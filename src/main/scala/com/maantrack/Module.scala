@@ -3,6 +3,7 @@ package com.maantrack
 import cats.data.{ Kleisli, OptionT }
 import cats.effect.{ Blocker, ConcurrentEffect, ContextShift, Sync, Timer }
 import cats.implicits._
+import com.maantrack.config.JwtConfig
 import com.maantrack.db.{ Decoders, Encoders }
 import com.maantrack.domain.User
 import com.maantrack.endpoint._
@@ -34,7 +35,8 @@ import scala.concurrent.duration._
 
 class Module[F[_]: Sync: Logger: ConcurrentEffect: Timer: ContextShift](
   xa: Transactor[F],
-  blocker: Blocker
+  blocker: Blocker,
+  jwtConfig: JwtConfig
 ) extends Http4sDsl[F] {
 
   private lazy val ctx: Postgres[SnakeCase] with Decoders with Encoders =
@@ -43,19 +45,17 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect: Timer: ContextShift](
   case class AuthUser(id: Long, name: String)
 
   private val authUser: Kleisli[F, Request[F], Either[String, User]] = Kleisli(req => {
-    val maybeToken: Option[String] = req.headers.get(Authorization).collect {
-      case Authorization(Token(AuthScheme.Bearer, token)) => token
-    }
-    maybeToken
+    req.headers
+      .get(Authorization)
+      .collect {
+        case Authorization(Token(AuthScheme.Bearer, token)) => token
+      }
       .fold("Bearer token not found".asLeft[User].pure[F]) { token =>
         Jwt
-          .decode(token, "53cr3t", JwtAlgorithm.allHmac())
+          .decode(token, jwtConfig.hmacSecret, JwtAlgorithm.allHmac())
           .toEither
           .fold(_ => "Invalid access token".asLeft, _.asRight)
-          .map(c =>
-            decode[User](c.content)
-              .fold(_ => "Token parsing error".asLeft, _.asRight)
-          )
+          .map(c => decode[User](c.content).fold(_ => "Token parsing error".asLeft, _.asRight))
           .flatten
           .pure[F]
       }
@@ -81,7 +81,7 @@ class Module[F[_]: Sync: Logger: ConcurrentEffect: Timer: ContextShift](
   private val cardService: CardService[F]                  = new CardService[F](cardRepository)
   private val cardEndpoint: HttpRoutes[F]                  = new CardRoutes[F](cardService).routes(authMiddleware)
 
-  private val authService: AuthService[F]  = new AuthService[F](userService)
+  private val authService: AuthService[F]  = new AuthService[F](userService, jwtConfig)
   private val loginEndpoint: HttpRoutes[F] = new LoginRoutes[F](authService).routes
 
   private val swaggerRoute = SwaggerUIRoutes(blocker).routes

@@ -38,7 +38,7 @@ class BoardTest extends BaseTest with TestEmbeddedPostgres with Eventually with 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     contextShift = IO.contextShift(ExecutionContext.global)
-    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global))
+    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global), jwtConfig)
   }
 
   "/board" should "create board" in {

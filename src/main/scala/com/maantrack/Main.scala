@@ -2,7 +2,7 @@ package com.maantrack
 
 import cats.effect._
 import cats.implicits._
-import com.maantrack.config.{ DatabaseConfig, ServerConfig }
+import com.maantrack.config.{ DatabaseConfig, JwtConfig, ServerConfig }
 import doobie.util.ExecutionContexts
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import io.chrisdavenport.log4cats.{ Logger, SelfAwareStructuredLogger }
@@ -25,10 +25,11 @@ object HttpServer {
     for {
       serverConfig   <- Resource.liftF(ConfigSource.default.at("server").loadOrThrow[ServerConfig].pure[F])
       dataBaseConfig <- Resource.liftF(ConfigSource.default.at("database").loadOrThrow[DatabaseConfig].pure[F])
+      jwtConfig      <- Resource.liftF(ConfigSource.default.at("jwt").loadOrThrow[JwtConfig].pure[F])
       connEc         <- ExecutionContexts.fixedThreadPool[F](dataBaseConfig.poolSize)
       blocker        <- Blocker[F]
       xa             <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
-      module         = new Module(xa, blocker)
+      module         = new Module(xa, blocker, jwtConfig)
       _              <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
       server <- BlazeServerBuilder[F]
                  .bindHttp(serverConfig.port, serverConfig.host)

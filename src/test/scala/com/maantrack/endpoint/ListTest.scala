@@ -32,7 +32,7 @@ class ListTest extends BaseTest with TestEmbeddedPostgres with Eventually with H
   override protected def beforeAll(): Unit = {
     super.beforeAll()
     contextShift = IO.contextShift(ExecutionContext.global)
-    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global))
+    module = new Module(currentDb.xa, Blocker.liftExecutionContext(ExecutionContext.global), jwtConfig)
   }
 
   "/list" should "create list" in {
