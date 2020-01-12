@@ -30,5 +30,6 @@ class AuthService[F[_]: Sync: Logger](userService: UserService[F], jwtConfig: Jw
       )
     )
 
+  //TODO: Implement session/timeout for jwt-token
   def logout(token: JwtToken, username: String): F[Unit] = ???
 }

@@ -19,7 +19,6 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
     with Schema {
   import ctx._
   implicit val userUpdateMeta: UpdateMeta[User] = updateMeta[User](_.userId)
-  //  implicit val userInsertMeta: InsertMeta[User] = insertMeta[User](_.userId)
 
   private def selectUserById(id: Long): Quoted[EntityQuery[User]] = quote {
     userSchema.filter(_.userId == lift(id))
