@@ -19,8 +19,6 @@ class UserService[F[_]: Async](userRepository: UserRepository[F]) {
   def getUserByUserName(userName: String): OptionT[F, User] =
     userRepository.getUserByUserName(userName)
 
-  def findUserByUsernameAndPassword(username: String, password: String): OptionT[F, User] =
-    userRepository.findUserByUsernameAndPassword(username, password)
 }
 
 object UserService {

@@ -70,7 +70,8 @@ lazy val http4s = Seq(
   "io.circe"       %% "circe-parser"         % circeVersion,
   "io.circe"       %% "circe-core"           % circeVersion,
   "io.circe"       %% "circe-config"         % circeConfigVersion,
-  "dev.profunktor" %% "http4s-jwt-auth"      % "0.0.3"
+  "dev.profunktor" %% "http4s-jwt-auth"      % "0.0.3",
+  "org.mindrot"    % "jbcrypt"               % "0.4"
 )
 
 lazy val common = Seq(

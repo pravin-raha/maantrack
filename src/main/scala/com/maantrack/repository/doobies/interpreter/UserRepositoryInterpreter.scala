@@ -29,12 +29,6 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
     userSchema.filter(_.userName == lift(userName))
   }
 
-  private def selectUserByUsernameAndPassword(username: String, password: String): Quoted[EntityQuery[User]] = quote {
-    userSchema
-      .filter(_.userName == lift(username))
-      .filter(_.password == lift(password))
-  }
-
   override def addUser(userRequest: UserRequest): F[User] =
     run(quote {
       userSchema.insert(lift(userRequest.toUser)).returningGenerated(_.userId)
@@ -54,9 +48,6 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
 
   override def getUserByUserName(userName: String): OptionT[F, User] =
     OptionT(run(selectUserByUserName(userName)).transact(xa).map(_.headOption))
-
-  override def findUserByUsernameAndPassword(username: String, password: String): OptionT[F, User] =
-    OptionT(run(selectUserByUsernameAndPassword(username, password)).transact(xa).map(_.headOption))
 }
 
 object UserRepositoryInterpreter {

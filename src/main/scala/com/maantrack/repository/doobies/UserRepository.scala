@@ -14,5 +14,4 @@ trait UserRepository[F[_]] {
 
   def getUserByUserName(username: String): OptionT[F, User]
 
-  def findUserByUsernameAndPassword(username: String, password: String): OptionT[F, User]
 }

@@ -3,7 +3,7 @@ package com.maantrack.endpoint
 import cats.effect._
 import cats.implicits._
 import com.maantrack.domain.{ User, UserRequest, UserResponse }
-import com.maantrack.service.UserService
+import com.maantrack.service.{ Crypto, UserService }
 import io.chrisdavenport.log4cats.Logger
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -23,7 +23,7 @@ class UserRoutes[F[_]: Sync: Logger](
     case req @ POST -> Root =>
       for {
         userRequest <- req.as[UserRequest]
-        hash        = userRequest.password //TODO add new hasher
+        hash        = Crypto.encrypt(userRequest.password)
         userRes <- userService
                     .addUser(userRequest.copy(password = hash))
                     .map(_.into[UserResponse].transform)
