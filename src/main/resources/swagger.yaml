@@ -41,38 +41,6 @@ paths:
       responses:
         default:
           description: "successful operation"
-  /user/login:
-    post:
-      tags:
-        - "user"
-      summary: "Logs user into the system"
-      description: ""
-      operationId: "loginUser"
-      produces:
-        - "application/json"
-      parameters:
-        - in: "body"
-          name: "body"
-          description: "Created user object"
-          required: true
-          schema:
-            $ref: '#/definitions/UserCredential'
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-        400:
-          description: "Invalid username/password supplied"
   /user/{userId}:
     get:
       tags:
@@ -324,7 +292,38 @@ paths:
             $ref: "#/definitions/Card"
         404:
           description: "Card not found"
-
+  /auth/login:
+    post:
+      tags:
+        - "user"
+      summary: "Logs user into the system"
+      description: ""
+      operationId: "loginUser"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Created user object"
+          required: true
+          schema:
+            $ref: '#/definitions/UserCredential'
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+          headers:
+            X-Rate-Limit:
+              type: "integer"
+              format: "int32"
+              description: "calls per hour allowed by the user"
+            X-Expires-After:
+              type: "string"
+              format: "date-time"
+              description: "date in UTC when token expires"
+        400:
+          description: "Invalid username/password supplied"
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -361,7 +360,7 @@ definitions:
         type: "string"
       email:
         type: "string"
-      firsName:
+      firstName:
         type: "string"
       lastName:
         type: "string"
@@ -390,7 +389,7 @@ definitions:
     required:
       - "userName"
       - "email"
-      - "firsName"
+      - "firstName"
       - "lastName"
       - "userType"
       - "password"
@@ -398,7 +397,7 @@ definitions:
     properties:
       email:
         type: "string"
-      firsName:
+      firstName:
         type: "string"
       lastName:
         type: "string"

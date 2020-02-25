@@ -6,7 +6,6 @@ import org.slf4j.{ Logger, LoggerFactory }
 import scala.concurrent.duration._
 
 object Doobie {
-
   private val SlowThreshold  = 200.millis
   private val logger: Logger = LoggerFactory.getLogger(Doobie.getClass)
 
@@ -21,6 +20,5 @@ object Doobie {
       logger.error(s"Processing failure (execution: $exec, processing: $processing): $sql | args: $args", failure)
     case ExecFailure(sql, args, exec, failure) =>
       logger.error(s"Execution failure (execution: $exec): $sql | args: $args", failure)
-
   }
 }
