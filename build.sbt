@@ -32,7 +32,7 @@ lazy val maantrack = project
   )
 
 lazy val doobieVersion             = "0.8.8"
-lazy val http4sVersion             = "0.21.1"
+lazy val http4sVersion             = "0.21.2"
 lazy val circeVersion              = "0.13.0"
 lazy val flywayVersion             = "6.3.1"
 lazy val circeGenericExtrasVersion = "0.13.0"
