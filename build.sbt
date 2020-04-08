@@ -31,7 +31,7 @@ lazy val maantrack = project
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
   )
 
-lazy val doobieVersion             = "0.8.8"
+lazy val doobieVersion             = "0.9.0"
 lazy val http4sVersion             = "0.21.3"
 lazy val circeVersion              = "0.13.0"
 lazy val flywayVersion             = "6.3.1"
