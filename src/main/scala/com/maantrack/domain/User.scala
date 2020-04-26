@@ -4,6 +4,8 @@ import java.time.Instant
 
 import cats.effect.Sync
 import io.circe.generic.auto._
+import io.circe.generic.extras.semiauto._
+import io.circe.{ Decoder, Encoder }
 import io.getquill.Embedded
 import io.scalaland.chimney.dsl._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
@@ -78,8 +80,11 @@ object InvalidUserOrPassword {
 }
 
 object Role {
-  lazy val Customer: Role      = Role("User")
-  lazy val Administrator: Role = Role("Administrator")
+  lazy val Customer: Role             = Role("User")
+  lazy val Administrator: Role        = Role("Administrator")
+
+  implicit val encoder: Encoder[Role] = deriveUnwrappedEncoder
+  implicit val decoder: Decoder[Role] = deriveUnwrappedDecoder
 }
 
 object UserResponse {

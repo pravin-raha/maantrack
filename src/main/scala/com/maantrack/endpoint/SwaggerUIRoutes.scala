@@ -17,7 +17,7 @@ class SwaggerUIRoutes[F[_]: Sync](blocker: Blocker)(implicit cf: ConcurrentEffec
   private val httpRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
     case _ @GET -> `swaggerUiPath` / "config.json" =>
       //Entry point to Swagger UI
-      Ok(Json.obj("url" -> Json.fromString(s"/swagger.yaml")))
+      Ok(Json.obj("url" -> Json.fromString(s"/docs/swagger.yaml")))
     case _ @GET -> `swaggerUiPath` =>
       PermanentRedirect(Location(uri"swagger-ui/index.html"))
     case request @ GET -> path if path.startsWith(swaggerUiPath) =>
