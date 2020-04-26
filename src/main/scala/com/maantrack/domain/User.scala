@@ -74,6 +74,8 @@ case class UserCredential(userName: String, password: String)
 
 case class InvalidUserOrPassword(userName: String) extends NoStackTrace
 
+case class UsernameAlreadyExist(userName: String) extends NoStackTrace
+
 object InvalidUserOrPassword {
   implicit def encoder[F[_]: Sync]: EntityEncoder[F, InvalidUserOrPassword] = jsonEncoderOf
   implicit def decoder[F[_]: Sync]: EntityDecoder[F, InvalidUserOrPassword] = jsonOf
