@@ -80,8 +80,8 @@ object InvalidUserOrPassword {
 }
 
 object Role {
-  lazy val Customer: Role             = Role("User")
-  lazy val Administrator: Role        = Role("Administrator")
+  lazy val Customer: Role      = Role("User")
+  lazy val Administrator: Role = Role("Administrator")
 
   implicit val encoder: Encoder[Role] = deriveUnwrappedEncoder
   implicit val decoder: Decoder[Role] = deriveUnwrappedDecoder
