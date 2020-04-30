@@ -42,7 +42,7 @@ lazy val catsVersion               = "2.1.1"
 lazy val catsEffectVersion         = "2.1.3"
 lazy val pureconfigVersion         = "0.12.3"
 lazy val log4catsSlf4jVersion      = "1.0.1"
-lazy val chimneyVersion            = "0.5.0"
+lazy val chimneyVersion            = "0.5.1"
 lazy val scalaCheckVersion         = "1.14.3"
 lazy val scalaTestVersion          = "3.1.1"
 lazy val scalacticVersion          = "3.1.1"
@@ -75,7 +75,7 @@ lazy val http4s = Seq(
 )
 
 lazy val common = Seq(
-  "mysql"                 % "mysql-connector-java" % "8.0.19",
+  "mysql"                 % "mysql-connector-java" % "8.0.20",
   "org.typelevel"         %% "cats-core"           % catsVersion,
   "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
   "com.github.pureconfig" %% "pureconfig"          % pureconfigVersion,
@@ -89,8 +89,8 @@ lazy val refined = Seq(
 )
 
 lazy val webjar = Seq(
-  "org.webjars" % "webjars-locator" % "0.39",
   "org.webjars" % "swagger-ui"      % "3.25.1"
+  "org.webjars" % "webjars-locator" % "0.40",
 )
 
 lazy val testDependencies = Seq(
