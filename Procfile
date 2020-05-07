@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/maantrack -Dserver.port=${PORT}
+web: target/universal/stage/bin/maantrack -Dserver.port=${PORT} -Ddatabase.url=${DB_URL} -Ddatabase.user=${DB_USER} -Ddatabase.password=${DB_PASSWORD}

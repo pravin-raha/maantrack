@@ -2,7 +2,7 @@ package com.maantrack.endpoint
 
 import cats.effect._
 import cats.implicits._
-import com.maantrack.domain.{ User, UserRequest, UserResponse }
+import com.maantrack.domain.{ User, UserRequest, UserResponse, UsernameAlreadyExist }
 import com.maantrack.service.{ Crypto, UserService }
 import io.chrisdavenport.log4cats.Logger
 import io.circe.generic.auto._
@@ -21,14 +21,16 @@ class UserRoutes[F[_]: Sync: Logger](
 
   private val userCreateRoutes = HttpRoutes.of[F] {
     case req @ POST -> Root =>
-      for {
+      (for {
         userRequest <- req.as[UserRequest]
         hash        = Crypto.encrypt(userRequest.password)
         userRes <- userService
                     .addUser(userRequest.copy(password = hash))
                     .map(_.into[UserResponse].transform)
         result <- Ok(userRes.asJson)
-      } yield result
+      } yield result).recoverWith {
+        case UsernameAlreadyExist(username) => Conflict(s"Username already exist: $username")
+      }
   }
 
   private val httpRoutes: AuthedRoutes[User, F] = AuthedRoutes.of {

@@ -4,6 +4,8 @@ import java.time.Instant
 
 import cats.effect.Sync
 import io.circe.generic.auto._
+import io.circe.generic.extras.semiauto._
+import io.circe.{ Decoder, Encoder }
 import io.getquill.Embedded
 import io.scalaland.chimney.dsl._
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
@@ -72,6 +74,8 @@ case class UserCredential(userName: String, password: String)
 
 case class InvalidUserOrPassword(userName: String) extends NoStackTrace
 
+case class UsernameAlreadyExist(userName: String) extends NoStackTrace
+
 object InvalidUserOrPassword {
   implicit def encoder[F[_]: Sync]: EntityEncoder[F, InvalidUserOrPassword] = jsonEncoderOf
   implicit def decoder[F[_]: Sync]: EntityDecoder[F, InvalidUserOrPassword] = jsonOf
@@ -80,6 +84,9 @@ object InvalidUserOrPassword {
 object Role {
   lazy val Customer: Role      = Role("User")
   lazy val Administrator: Role = Role("Administrator")
+
+  implicit val encoder: Encoder[Role] = deriveUnwrappedEncoder
+  implicit val decoder: Decoder[Role] = deriveUnwrappedDecoder
 }
 
 object UserResponse {

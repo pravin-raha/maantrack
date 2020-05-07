@@ -7,9 +7,9 @@ lazy val commonSettings =
     dockerExposedPorts ++= Seq(8080),
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases",
-    sonarUseExternalConfig := true,
-    coverageEnabled := true,
-    coverageHighlighting := true
+    sonarUseExternalConfig := false,
+    coverageEnabled := false,
+    coverageHighlighting := false
   )
 
 lazy val maantrack = project
@@ -31,20 +31,20 @@ lazy val maantrack = project
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
   )
 
-lazy val doobieVersion             = "0.8.8"
-lazy val http4sVersion             = "0.21.1"
+lazy val doobieVersion             = "0.9.0"
+lazy val http4sVersion             = "0.21.3"
 lazy val circeVersion              = "0.13.0"
-lazy val flywayVersion             = "6.2.4"
+lazy val flywayVersion             = "6.4.0"
 lazy val circeGenericExtrasVersion = "0.13.0"
-lazy val circeConfigVersion        = "0.7.0"
-lazy val refinedVersion            = "0.9.12"
+lazy val circeConfigVersion        = "0.8.0"
+lazy val refinedVersion            = "0.9.14"
 lazy val catsVersion               = "2.1.1"
-lazy val catsEffectVersion         = "2.1.1"
-lazy val pureconfigVersion         = "0.12.2"
+lazy val catsEffectVersion         = "2.1.3"
+lazy val pureconfigVersion         = "0.12.3"
 lazy val log4catsSlf4jVersion      = "1.0.1"
-lazy val chimneyVersion            = "0.4.1"
+lazy val chimneyVersion            = "0.5.1"
 lazy val scalaCheckVersion         = "1.14.3"
-lazy val scalaTestVersion          = "3.1.0"
+lazy val scalaTestVersion          = "3.1.1"
 lazy val scalacticVersion          = "3.1.1"
 lazy val scalaTestPlusVersion      = "3.1.0.0-RC2"
 
@@ -55,7 +55,7 @@ lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-postgres"  % doobieVersion,
   "org.tpolecat" %% "doobie-h2"        % doobieVersion,
   "org.tpolecat" %% "doobie-quill"     % doobieVersion,
-  "io.getquill"  %% "quill-jdbc"       % "3.5.0",
+  "io.getquill"  %% "quill-jdbc"       % "3.5.1",
   "org.flywaydb" % "flyway-core"       % flywayVersion
 )
 
@@ -75,7 +75,7 @@ lazy val http4s = Seq(
 )
 
 lazy val common = Seq(
-  "mysql"                 % "mysql-connector-java" % "8.0.19",
+  "mysql"                 % "mysql-connector-java" % "8.0.20",
   "org.typelevel"         %% "cats-core"           % catsVersion,
   "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
   "com.github.pureconfig" %% "pureconfig"          % pureconfigVersion,
@@ -89,8 +89,8 @@ lazy val refined = Seq(
 )
 
 lazy val webjar = Seq(
-  "org.webjars" % "webjars-locator" % "0.38",
-  "org.webjars" % "swagger-ui"      % "3.25.0"
+  "org.webjars" % "swagger-ui"      % "3.25.1",
+  "org.webjars" % "webjars-locator" % "0.40"
 )
 
 lazy val testDependencies = Seq(

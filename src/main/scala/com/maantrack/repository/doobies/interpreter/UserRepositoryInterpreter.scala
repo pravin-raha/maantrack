@@ -4,9 +4,10 @@ import cats.data.OptionT
 import cats.effect.Sync
 import cats.implicits._
 import com.maantrack.db.{ Decoders, Encoders, Schema }
-import com.maantrack.domain.{ User, UserRequest }
+import com.maantrack.domain.{ User, UserRequest, UsernameAlreadyExist }
 import com.maantrack.repository.doobies.UserRepository
 import doobie.implicits._
+import doobie.postgres.sqlstate
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.Logger
@@ -31,7 +32,15 @@ class UserRepositoryInterpreter[F[_]: Sync: Logger](
   override def addUser(userRequest: UserRequest): F[User] =
     run(quote {
       userSchema.insert(lift(userRequest.toUser)).returningGenerated(_.userId)
-    }).transact(xa).map(userId => userRequest.toUser.copy(userId = userId))
+    }).transact(xa)
+      .map(userId => userRequest.toUser.copy(userId = userId))
+      .attemptSomeSqlState {
+        case sqlstate.class23.UNIQUE_VIOLATION => UsernameAlreadyExist(userRequest.userName)
+      }
+      .flatMap {
+        case Left(e)     => e.raiseError[F, User]
+        case Right(user) => user.pure[F]
+      }
 
   override def deleteUserById(id: Long): OptionT[F, User] =
     getUserById(id)
