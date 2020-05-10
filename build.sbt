@@ -3,7 +3,7 @@ lazy val commonSettings =
     organization := "io.github.pravin-raha",
     name := "maantrack",
     version := "0.1",
-    scalaVersion := "2.13.0",
+    scalaVersion := "2.13.2",
     dockerExposedPorts ++= Seq(8080),
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases",
@@ -32,7 +32,7 @@ lazy val maantrack = project
   )
 
 lazy val doobieVersion             = "0.9.0"
-lazy val http4sVersion             = "0.21.3"
+lazy val http4sVersion             = "0.21.4"
 lazy val circeVersion              = "0.13.0"
 lazy val flywayVersion             = "6.4.0"
 lazy val circeGenericExtrasVersion = "0.13.0"
