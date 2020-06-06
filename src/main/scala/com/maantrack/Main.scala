@@ -10,6 +10,7 @@ import org.http4s.server.blaze._
 import org.http4s.server.{ Server => H4Server }
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
+import scala.concurrent.ExecutionContext.global
 
 object Main extends IOApp {
   implicit val unsafeLogger: SelfAwareStructuredLogger[IO] =
@@ -31,7 +32,7 @@ object HttpServer {
       xa             <- DatabaseConfig.dbTransactor(dataBaseConfig, connEc, blocker)
       module         = new Module(xa, blocker, jwtConfig)
       _              <- Resource.liftF(DatabaseConfig.initializeDb(dataBaseConfig))
-      server <- BlazeServerBuilder[F]
+      server <- BlazeServerBuilder[F](global)
                  .bindHttp(serverConfig.port, serverConfig.host)
                  .withHttpApp(module.httpApp)
                  .resource

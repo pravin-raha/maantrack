@@ -3,7 +3,7 @@ lazy val commonSettings =
     organization := "io.github.pravin-raha",
     name := "maantrack",
     version := "0.1",
-    scalaVersion := "2.13.0",
+    scalaVersion := "2.13.2",
     dockerExposedPorts ++= Seq(8080),
     resolvers += Resolver.sonatypeRepo("releases"),
     resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases",
@@ -32,20 +32,20 @@ lazy val maantrack = project
   )
 
 lazy val doobieVersion             = "0.9.0"
-lazy val http4sVersion             = "0.21.3"
+lazy val http4sVersion             = "0.21.4"
 lazy val circeVersion              = "0.13.0"
-lazy val flywayVersion             = "6.4.0"
+lazy val flywayVersion             = "6.4.3"
 lazy val circeGenericExtrasVersion = "0.13.0"
 lazy val circeConfigVersion        = "0.8.0"
 lazy val refinedVersion            = "0.9.14"
 lazy val catsVersion               = "2.1.1"
 lazy val catsEffectVersion         = "2.1.3"
 lazy val pureconfigVersion         = "0.12.3"
-lazy val log4catsSlf4jVersion      = "1.0.1"
-lazy val chimneyVersion            = "0.5.1"
+lazy val log4catsSlf4jVersion      = "1.1.1"
+lazy val chimneyVersion            = "0.5.2"
 lazy val scalaCheckVersion         = "1.14.3"
-lazy val scalaTestVersion          = "3.1.1"
-lazy val scalacticVersion          = "3.1.1"
+lazy val scalacticVersion          = "3.1.2"
+lazy val scalaTestVersion          = "3.1.2"
 lazy val scalaTestPlusVersion      = "3.1.0.0-RC2"
 
 lazy val doobie = Seq(
@@ -70,7 +70,7 @@ lazy val http4s = Seq(
   "io.circe"       %% "circe-parser"         % circeVersion,
   "io.circe"       %% "circe-core"           % circeVersion,
   "io.circe"       %% "circe-config"         % circeConfigVersion,
-  "dev.profunktor" %% "http4s-jwt-auth"      % "0.0.4",
+  "dev.profunktor" %% "http4s-jwt-auth"      % "0.0.5",
   "org.mindrot"    % "jbcrypt"               % "0.4"
 )
 
@@ -89,7 +89,7 @@ lazy val refined = Seq(
 )
 
 lazy val webjar = Seq(
-  "org.webjars" % "swagger-ui"      % "3.25.1",
+  "org.webjars" % "swagger-ui"      % "3.25.5",
   "org.webjars" % "webjars-locator" % "0.40"
 )
 
