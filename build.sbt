@@ -45,7 +45,7 @@ lazy val log4catsSlf4jVersion      = "1.1.1"
 lazy val chimneyVersion            = "0.5.2"
 lazy val scalaCheckVersion         = "1.14.3"
 lazy val scalacticVersion          = "3.1.2"
-lazy val scalaTestVersion          = "3.1.2"
+lazy val scalaTestVersion          = "3.2.0"
 lazy val scalaTestPlusVersion      = "3.1.0.0-RC2"
 
 lazy val doobie = Seq(
