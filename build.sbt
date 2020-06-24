@@ -55,7 +55,7 @@ lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-postgres"  % doobieVersion,
   "org.tpolecat" %% "doobie-h2"        % doobieVersion,
   "org.tpolecat" %% "doobie-quill"     % doobieVersion,
-  "io.getquill"  %% "quill-jdbc"       % "3.5.1",
+  "io.getquill"  %% "quill-jdbc"       % "3.5.2",
   "org.flywaydb" % "flyway-core"       % flywayVersion
 )
 
