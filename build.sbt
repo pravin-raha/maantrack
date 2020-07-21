@@ -34,12 +34,12 @@ lazy val maantrack = project
 lazy val doobieVersion             = "0.9.0"
 lazy val http4sVersion             = "0.21.6"
 lazy val circeVersion              = "0.13.0"
-lazy val flywayVersion             = "6.4.4"
+lazy val flywayVersion             = "6.5.1"
 lazy val circeGenericExtrasVersion = "0.13.0"
 lazy val circeConfigVersion        = "0.8.0"
-lazy val refinedVersion            = "0.9.14"
+lazy val refinedVersion            = "0.9.15"
 lazy val catsVersion               = "2.1.1"
-lazy val catsEffectVersion         = "2.1.3"
+lazy val catsEffectVersion         = "2.1.4"
 lazy val pureconfigVersion         = "0.13.0"
 lazy val log4catsSlf4jVersion      = "1.1.1"
 lazy val chimneyVersion            = "0.5.2"
@@ -89,7 +89,7 @@ lazy val refined = Seq(
 )
 
 lazy val webjar = Seq(
-  "org.webjars" % "swagger-ui"      % "3.27.0",
+  "org.webjars" % "swagger-ui"      % "3.28.0",
   "org.webjars" % "webjars-locator" % "0.40"
 )
 
