@@ -2,7 +2,7 @@ package com.maantrack.repository.doobies.interpreter
 
 import cats.data.OptionT
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.domain.AppUserBoard
 import com.maantrack.repository.doobies.AppUserBoardRepository
 import com.maantrack.repository.doobies.Doobie._

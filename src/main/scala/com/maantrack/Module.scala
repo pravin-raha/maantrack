@@ -2,7 +2,7 @@ package com.maantrack
 
 import cats.data.{ Kleisli, OptionT }
 import cats.effect.{ Blocker, ConcurrentEffect, ContextShift, Sync, Timer }
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.config.JwtConfig
 import com.maantrack.db.{ Decoders, Encoders }
 import com.maantrack.domain.User

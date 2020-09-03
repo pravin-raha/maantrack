@@ -1,7 +1,7 @@
 package com.maantrack.endpoint.auth
 
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.domain.User
 import com.maantrack.service.AuthService
 import dev.profunktor.auth.AuthHeaders

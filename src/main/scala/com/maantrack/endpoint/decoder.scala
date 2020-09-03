@@ -1,7 +1,7 @@
 package com.maantrack.endpoint
 
 import cats.Monad
-import cats.implicits._
+import cats.syntax.all._
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 

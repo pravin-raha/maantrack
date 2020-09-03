@@ -1,7 +1,7 @@
 package com.maantrack.service
 
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.config.JwtConfig
 import com.maantrack.domain.{ InvalidUserOrPassword, User }
 import dev.profunktor.auth.jwt.JwtToken

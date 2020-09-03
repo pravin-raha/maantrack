@@ -1,7 +1,7 @@
 package com.maantrack.endpoint
 
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.domain.{ BoardRequest, User }
 import com.maantrack.service.BoardService
 import io.circe.generic.auto._
