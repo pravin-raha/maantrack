@@ -1,7 +1,7 @@
 package com.maantrack.endpoint
 
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.domain.{ User, UserRequest, UserResponse, UsernameAlreadyExist }
 import com.maantrack.service.{ Crypto, UserService }
 import io.chrisdavenport.log4cats.Logger

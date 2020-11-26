@@ -1,7 +1,7 @@
 package com.maantrack.endpoint.auth
 
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.domain.{ InvalidUserOrPassword, UserCredential }
 import com.maantrack.endpoint.decoder._
 import com.maantrack.service.AuthService

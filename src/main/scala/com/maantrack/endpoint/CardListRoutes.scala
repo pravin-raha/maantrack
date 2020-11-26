@@ -1,7 +1,7 @@
 package com.maantrack.endpoint
 
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.domain.{ CardListRequest, User }
 import com.maantrack.service.CardListService
 import io.circe.generic.auto._
