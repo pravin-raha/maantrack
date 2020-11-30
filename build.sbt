@@ -89,7 +89,7 @@ lazy val refined = Seq(
 )
 
 lazy val webjar = Seq(
-  "org.webjars" % "swagger-ui"      % "3.28.0",
+  "org.webjars" % "swagger-ui"      % "3.37.2",
   "org.webjars" % "webjars-locator" % "0.40"
 )
 
