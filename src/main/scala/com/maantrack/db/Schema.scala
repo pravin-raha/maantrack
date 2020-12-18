@@ -2,7 +2,7 @@ package com.maantrack.db
 
 import com.maantrack.domain.{ CardList, User }
 import doobie.quill.DoobieContext.Postgres
-import io.getquill.SnakeCase
+import io.getquill.{ EntityQuery, SnakeCase }
 
 trait Schema {
   val ctx: Postgres[SnakeCase] with Decoders

@@ -10,7 +10,7 @@ import doobie.implicits._
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.Logger
-import io.getquill.SnakeCase
+import io.getquill.{ EntityQuery, SnakeCase }
 
 class CardListRepositoryInterpreter[F[_]: Sync: Logger](
   xa: Transactor[F],
@@ -19,7 +19,7 @@ class CardListRepositoryInterpreter[F[_]: Sync: Logger](
     with Schema {
   import ctx._
 
-  private def selectCardListById(id: Long): ctx.Quoted[ctx.EntityQuery[CardList]] = quote {
+  private def selectCardListById(id: Long): Quoted[EntityQuery[CardList]] = quote {
     cardListSchema.filter(cl => cl.listId == lift(id))
   }
   override def add(listRequest: CardListRequest): F[Long] =

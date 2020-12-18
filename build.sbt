@@ -31,9 +31,9 @@ lazy val maantrack = project
     addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
   )
 
-lazy val doobieVersion             = "0.9.0"
+lazy val doobieVersion             = "0.9.4"
 lazy val http4sVersion             = "0.21.14"
-lazy val circeVersion              = "0.13.0"
+lazy val circeVersion              = "0.14.0-M1"
 lazy val flywayVersion             = "6.5.1"
 lazy val circeGenericExtrasVersion = "0.13.0"
 lazy val circeConfigVersion        = "0.8.0"
@@ -46,7 +46,7 @@ lazy val chimneyVersion            = "0.5.3"
 lazy val scalaCheckVersion         = "1.15.2"
 lazy val scalacticVersion          = "3.2.0"
 lazy val scalaTestVersion          = "3.2.3"
-lazy val scalaTestPlusVersion      = "3.2.3.0"
+lazy val scalaTestPlusVersion      = "3.1.0.0-RC2"
 lazy val quillJdbcVersion          = "3.5.1"
 lazy val http4sJwtAuthVersion      = "0.0.5"
 lazy val jbcryptVersion            = "0.4"

@@ -11,7 +11,7 @@ import doobie.postgres.sqlstate
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
 import io.chrisdavenport.log4cats.Logger
-import io.getquill.SnakeCase
+import io.getquill.{ EntityQuery, SnakeCase }
 
 class UserRepositoryInterpreter[F[_]: Sync: Logger](
   xa: Transactor[F],
