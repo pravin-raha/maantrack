@@ -2,7 +2,7 @@ package com.maantrack.repository.doobies.interpreter
 
 import cats.data.OptionT
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.db.{ Decoders, Encoders, Schema }
 import com.maantrack.domain.{ Card, CardRequest }
 import com.maantrack.repository.doobies.CardRepository

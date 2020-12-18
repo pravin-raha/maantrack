@@ -1,7 +1,7 @@
 package com.maantrack
 
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
 import com.maantrack.config.{ DatabaseConfig, JwtConfig, ServerConfig }
 import doobie.util.ExecutionContexts
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
