@@ -1,6 +1,6 @@
 package com.maantrack.endpoint.auth
 
-import cats.effect.Sync
+import cats.effect._
 import cats.syntax.all._
 import com.maantrack.domain.User
 import com.maantrack.service.AuthService

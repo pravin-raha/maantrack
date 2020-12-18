@@ -1,6 +1,6 @@
 package com.maantrack.test
 
-import cats.effect.concurrent.MVar
+import cats.effect.concurrent.{ MVar, MVar2 }
 import cats.effect.{ ContextShift, IO }
 import cats.implicits._
 import com.maantrack.config.DatabaseConfig
@@ -12,9 +12,9 @@ import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext
 
 class TestDB(config: DatabaseConfig) {
-  implicit val cs: ContextShift[IO]             = IO.contextShift(ExecutionContext.global)
-  private val xaReady: MVar[IO, Transactor[IO]] = MVar.empty[IO, Transactor[IO]].unsafeRunSync()
-  private val done: MVar[IO, Unit]              = MVar.empty[IO, Unit].unsafeRunSync()
+  implicit val cs: ContextShift[IO]              = IO.contextShift(ExecutionContext.global)
+  private val xaReady: MVar2[IO, Transactor[IO]] = MVar.empty[IO, Transactor[IO]].unsafeRunSync()
+  private val done: MVar2[IO, Unit]              = MVar.empty[IO, Unit].unsafeRunSync()
 
   val xa: Transactor[IO] = Transactor.fromDriverManager[IO](
     config.driver,

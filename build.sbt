@@ -32,21 +32,27 @@ lazy val maantrack = project
   )
 
 lazy val doobieVersion             = "0.9.0"
-lazy val http4sVersion             = "0.21.6"
+lazy val http4sVersion             = "0.21.14"
 lazy val circeVersion              = "0.13.0"
 lazy val flywayVersion             = "6.5.1"
 lazy val circeGenericExtrasVersion = "0.13.0"
 lazy val circeConfigVersion        = "0.8.0"
 lazy val refinedVersion            = "0.9.15"
 lazy val catsVersion               = "2.3.0"
-lazy val catsEffectVersion         = "2.1.4"
+lazy val catsEffectVersion         = "2.3.0"
 lazy val pureconfigVersion         = "0.13.0"
 lazy val log4catsSlf4jVersion      = "1.1.1"
 lazy val chimneyVersion            = "0.5.3"
 lazy val scalaCheckVersion         = "1.15.2"
 lazy val scalacticVersion          = "3.2.0"
-lazy val scalaTestVersion          = "3.2.2"
-lazy val scalaTestPlusVersion      = "3.1.0.0-RC2"
+lazy val scalaTestVersion          = "3.2.3"
+lazy val scalaTestPlusVersion      = "3.2.3.0"
+lazy val quillJdbcVersion          = "3.5.1"
+lazy val http4sJwtAuthVersion      = "0.0.5"
+lazy val jbcryptVersion            = "0.4"
+lazy val logbackVersion            = "1.2.3"
+lazy val swaggerUIVersion          = "3.38.0"
+lazy val webjarsLocatorVersion     = "0.40"
 
 lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-core"      % doobieVersion,
@@ -55,7 +61,7 @@ lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-postgres"  % doobieVersion,
   "org.tpolecat" %% "doobie-h2"        % doobieVersion,
   "org.tpolecat" %% "doobie-quill"     % doobieVersion,
-  "io.getquill"  %% "quill-jdbc"       % "3.5.1",
+  "io.getquill"  %% "quill-jdbc"       % quillJdbcVersion,
   "org.flywaydb" % "flyway-core"       % flywayVersion
 )
 
@@ -70,18 +76,17 @@ lazy val http4s = Seq(
   "io.circe"       %% "circe-parser"         % circeVersion,
   "io.circe"       %% "circe-core"           % circeVersion,
   "io.circe"       %% "circe-config"         % circeConfigVersion,
-  "dev.profunktor" %% "http4s-jwt-auth"      % "0.0.5",
-  "org.mindrot"    % "jbcrypt"               % "0.4"
+  "dev.profunktor" %% "http4s-jwt-auth"      % http4sJwtAuthVersion,
+  "org.mindrot"    % "jbcrypt"               % jbcryptVersion
 )
 
 lazy val common = Seq(
-  "mysql"                 % "mysql-connector-java" % "8.0.20",
-  "org.typelevel"         %% "cats-core"           % catsVersion,
-  "org.typelevel"         %% "cats-effect"         % catsEffectVersion,
-  "com.github.pureconfig" %% "pureconfig"          % pureconfigVersion,
-  "io.chrisdavenport"     %% "log4cats-slf4j"      % log4catsSlf4jVersion,
-  "ch.qos.logback"        % "logback-classic"      % "1.2.3",
-  "io.scalaland"          %% "chimney"             % chimneyVersion
+  "org.typelevel"         %% "cats-core"      % catsVersion,
+  "org.typelevel"         %% "cats-effect"    % catsEffectVersion,
+  "com.github.pureconfig" %% "pureconfig"     % pureconfigVersion,
+  "io.chrisdavenport"     %% "log4cats-slf4j" % log4catsSlf4jVersion,
+  "ch.qos.logback"        % "logback-classic" % logbackVersion,
+  "io.scalaland"          %% "chimney"        % chimneyVersion
 )
 
 lazy val refined = Seq(
@@ -89,8 +94,8 @@ lazy val refined = Seq(
 )
 
 lazy val webjar = Seq(
-  "org.webjars" % "swagger-ui"      % "3.38.0",
-  "org.webjars" % "webjars-locator" % "0.40"
+  "org.webjars" % "swagger-ui"      % swaggerUIVersion,
+  "org.webjars" % "webjars-locator" % webjarsLocatorVersion
 )
 
 lazy val testDependencies = Seq(

@@ -26,7 +26,7 @@ class BoardRepositoryInterpreter[F[_]: Sync: Logger](
     } yield id).transact(xa)
   }
 
-  override def getById(id: Long) =
+  override def getById(id: Long): OptionT[F, Board] =
     OptionT(run(quote {
       query[Board].filter(_.boardId == lift(id))
     }).transact(xa).map(_.headOption))
