@@ -2,7 +2,7 @@ package com.maantrack.repository
 
 import java.time.Instant
 
-import doobie.enum.SqlState
+import doobie.enumerated.SqlState
 import doobie.util.meta.Meta
 import doobie.implicits.javasql._
 
