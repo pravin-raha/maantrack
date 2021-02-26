@@ -41,7 +41,7 @@ lazy val refinedVersion            = "0.9.20"
 lazy val catsVersion               = "2.4.2"
 lazy val catsEffectVersion         = "2.3.1"
 lazy val pureconfigVersion         = "0.13.0"
-lazy val log4catsSlf4jVersion      = "1.1.1"
+lazy val log4catsSlf4jVersion      = "1.2.0"
 lazy val chimneyVersion            = "0.5.3"
 lazy val scalaCheckVersion         = "1.15.3"
 lazy val scalacticVersion          = "3.2.0"
@@ -84,7 +84,7 @@ lazy val common = Seq(
   "org.typelevel"         %% "cats-core"      % catsVersion,
   "org.typelevel"         %% "cats-effect"    % catsEffectVersion,
   "com.github.pureconfig" %% "pureconfig"     % pureconfigVersion,
-  "io.chrisdavenport"     %% "log4cats-slf4j" % log4catsSlf4jVersion,
+  "org.typelevel"     %% "log4cats-slf4j" % log4catsSlf4jVersion,
   "ch.qos.logback"        % "logback-classic" % logbackVersion,
   "io.scalaland"          %% "chimney"        % chimneyVersion
 )
