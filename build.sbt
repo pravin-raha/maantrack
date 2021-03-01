@@ -84,7 +84,7 @@ lazy val common = Seq(
   "org.typelevel"         %% "cats-core"      % catsVersion,
   "org.typelevel"         %% "cats-effect"    % catsEffectVersion,
   "com.github.pureconfig" %% "pureconfig"     % pureconfigVersion,
-  "io.chrisdavenport"     %% "log4cats-slf4j" % log4catsSlf4jVersion,
+  "org.typelevel"     %% "log4cats-slf4j" % log4catsSlf4jVersion,
   "ch.qos.logback"        % "logback-classic" % logbackVersion,
   "io.scalaland"          %% "chimney"        % chimneyVersion
 )

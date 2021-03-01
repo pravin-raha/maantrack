@@ -5,7 +5,7 @@ import cats.syntax.all._
 import com.maantrack.domain.User
 import com.maantrack.service.AuthService
 import dev.profunktor.auth.AuthHeaders
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.{ AuthMiddleware, Router }
 import org.http4s.{ AuthedRoutes, HttpRoutes }

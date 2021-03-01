@@ -10,7 +10,7 @@ import doobie.implicits._
 import doobie.postgres.sqlstate
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import io.getquill.{ EntityQuery, SnakeCase }
 
 class UserRepositoryInterpreter[F[_]: Sync: Logger](

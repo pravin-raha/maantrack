@@ -9,7 +9,7 @@ import com.maantrack.repository.doobies.BoardRepository
 import doobie.implicits._
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import io.getquill.SnakeCase
 
 class BoardRepositoryInterpreter[F[_]: Sync: Logger](

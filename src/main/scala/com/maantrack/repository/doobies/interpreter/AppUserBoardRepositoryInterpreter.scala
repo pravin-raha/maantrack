@@ -12,7 +12,7 @@ import doobie.util.fragment.Fragment
 import doobie.util.query.Query0
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 
 object AppUserBoardSQL {
   import Fragments.whereAnd

@@ -9,7 +9,7 @@ import com.maantrack.repository.doobies.CardListRepository
 import doobie.implicits._
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import io.getquill.{ EntityQuery, SnakeCase }
 
 class CardListRepositoryInterpreter[F[_]: Sync: Logger](

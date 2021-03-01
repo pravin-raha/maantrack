@@ -18,7 +18,7 @@ import com.maantrack.service._
 import doobie.quill.DoobieContext
 import doobie.quill.DoobieContext.Postgres
 import doobie.util.transactor.Transactor
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.getquill.SnakeCase

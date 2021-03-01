@@ -5,7 +5,7 @@ import cats.syntax.all._
 import com.maantrack.config.JwtConfig
 import com.maantrack.domain.{ InvalidUserOrPassword, User }
 import dev.profunktor.auth.jwt.JwtToken
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import io.circe.generic.auto._
 import io.circe.syntax._
 import pdi.jwt.{ Jwt, JwtAlgorithm }
