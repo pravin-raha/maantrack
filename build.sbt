@@ -50,7 +50,7 @@ lazy val scalaTestPlusVersion      = "3.1.0.0-RC2"
 lazy val quillJdbcVersion          = "3.5.1"
 lazy val http4sJwtAuthVersion      = "0.0.6"
 lazy val jbcryptVersion            = "0.4"
-lazy val logbackVersion            = "1.2.3"
+lazy val logbackVersion            = "1.2.4"
 lazy val swaggerUIVersion          = "3.43.0"
 lazy val webjarsLocatorVersion     = "0.40"
 
