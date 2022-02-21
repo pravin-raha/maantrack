@@ -52,7 +52,7 @@ lazy val http4sJwtAuthVersion      = "0.0.6"
 lazy val jbcryptVersion            = "0.4"
 lazy val logbackVersion            = "1.2.9"
 lazy val swaggerUIVersion          = "3.43.0"
-lazy val webjarsLocatorVersion     = "0.42"
+lazy val webjarsLocatorVersion     = "0.45"
 
 lazy val doobie = Seq(
   "org.tpolecat" %% "doobie-core"      % doobieVersion,
