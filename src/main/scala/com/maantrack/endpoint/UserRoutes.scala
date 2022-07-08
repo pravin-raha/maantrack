@@ -4,7 +4,7 @@ import cats.effect._
 import cats.syntax.all._
 import com.maantrack.domain.{ User, UserRequest, UserResponse, UsernameAlreadyExist }
 import com.maantrack.service.{ Crypto, UserService }
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.scalaland.chimney.dsl._
