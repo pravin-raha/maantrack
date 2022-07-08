@@ -6,7 +6,7 @@ import com.maantrack.domain.{ InvalidUserOrPassword, UserCredential }
 import com.maantrack.endpoint.decoder._
 import com.maantrack.service.AuthService
 import dev.profunktor.auth.jwt.JwtToken
-import io.chrisdavenport.log4cats.Logger
+import org.typelevel.log4cats.Logger
 import io.circe.{ Decoder, Encoder }
 import org.http4s.circe.{ jsonEncoderOf, jsonOf }
 import org.http4s.dsl.Http4sDsl

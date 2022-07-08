@@ -4,8 +4,8 @@ import cats.effect._
 import cats.syntax.all._
 import com.maantrack.config.{ DatabaseConfig, JwtConfig, ServerConfig }
 import doobie.util.ExecutionContexts
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
-import io.chrisdavenport.log4cats.{ Logger, SelfAwareStructuredLogger }
+import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.{ Logger, SelfAwareStructuredLogger }
 import org.http4s.server.blaze._
 import org.http4s.server.{ Server => H4Server }
 import pureconfig.ConfigSource
